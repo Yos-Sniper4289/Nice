@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NICE English for My Career</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        /* --- Base Button Styles --- */
+        .btn {
+            @apply w-full font-bold text-lg py-3 px-6 rounded-xl shadow-md transform transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 active:scale-95;
+        }
+        .btn-primary {
+            @apply btn bg-gradient-to-br from-blue-500 to-blue-600 text-white;
+        }
+        .btn-secondary {
+            @apply btn bg-gray-200 text-gray-700 hover:bg-gray-300;
+        }
+        
+        /* --- Card Styles --- */
+        .card {
+            @apply bg-white rounded-2xl shadow-lg p-6 lg:p-10 transition-all duration-300;
+        }
+        .icon-card {
+             @apply flex flex-col items-center justify-center p-6 bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-lg cursor-pointer transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 hover:bg-white;
+        }
+
+        /* --- Career Button Styles --- */
+        .career-button {
+            @apply w-full text-left p-4 rounded-xl shadow-lg transition-all duration-300 ease-in-out flex flex-col h-32 justify-center items-center text-white transform hover:-translate-y-1.5 hover:shadow-xl;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="app-container" class="w-full min-h-screen flex flex-col">
+
+        <!-- 1. หน้าจอเลือกสายอาชีพ -->
+        <div id="selection-screen" class="flex flex-col items-center justify-between min-h-screen p-6 lg:p-12 text-center bg-white">
+            <div class="w-full"></div> <!-- Spacer for top -->
+            <div class="flex flex-col items-center w-full">
+                <h1 class="text-4xl lg:text-5xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">NICE English for My Career</h1>
+                <p class="text-lg text-gray-600 mb-10">ภาษาอังกฤษสำหรับสายอาชีพ</p>
+                <h2 class="text-2xl font-semibold text-blue-700 mb-6">กรุณาเลือกสาขาวิชาของคุณ</h2>
+                <div class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+                    <button onclick="selectCareer('general')" class="career-button bg-gradient-to-br from-indigo-500 to-indigo-600">
+                        <span class="text-4xl mb-1">📚</span>
+                        <span class="font-semibold text-center">แผนกสามัญสัมพันธ์</span>
+                    </button>
+                    <button onclick="selectCareer('mechanic')" class="career-button bg-gradient-to-br from-blue-500 to-blue-600">
+                        <span class="text-4xl mb-1">🔧</span>
+                        <span class="font-semibold text-center">สาขาวิชาช่างยนต์</span>
+                    </button>
+                    <button onclick="selectCareer('computer')" class="career-button bg-gradient-to-br from-purple-500 to-purple-600">
+                        <span class="text-4xl mb-1">💻</span>
+                        <span class="font-semibold text-center">เทคโนโลยีธุรกิจดิจิทัล</span>
+                    </button>
+                    <button onclick="selectCareer('power')" class="career-button bg-gradient-to-br from-yellow-500 to-yellow-600">
+                        <span class="text-4xl mb-1">⚡️</span>
+                        <span class="font-semibold text-center">สาขาวิชาไฟฟ้ากำลัง</span>
+                    </button>
+                     <button onclick="selectCareer('factory')" class="career-button bg-gradient-to-br from-slate-500 to-slate-600">
+                        <span class="text-4xl mb-1">⚙️</span>
+                        <span class="font-semibold text-center">ช่างกลโรงงาน</span>
+                    </button>
+                    <button onclick="selectCareer('electronics')" class="career-button bg-gradient-to-br from-red-500 to-red-600">
+                        <span class="text-4xl mb-1">🔌</span>
+                        <span class="font-semibold text-center">ช่างอิเล็กทรอนิกส์</span>
+                    </button>
+                     <button onclick="selectCareer('welding')" class="career-button bg-gradient-to-br from-orange-500 to-orange-600">
+                        <span class="text-4xl mb-1">🔥</span>
+                        <span class="font-semibold text-center">ช่างเชื่อมโลหะ</span>
+                    </button>
+                    <button onclick="selectCareer('accounting')" class="career-button bg-gradient-to-br from-cyan-500 to-cyan-600">
+                        <span class="text-4xl mb-1">🧾</span>
+                        <span class="font-semibold text-center">การบัญชี</span>
+                    </button>
+                     <button onclick="selectCareer('culinary')" class="career-button bg-gradient-to-br from-pink-500 to-pink-600">
+                        <span class="text-4xl mb-1">🍳</span>
+                        <span class="font-semibold text-center">คหกรรม (อาหาร)</span>
+                    </button>
+                </div>
+                <!-- Visitor Counter Element -->
+                <div id="visitor-counter" class="mt-10 text-md text-gray-500 flex items-center justify-center"></div>
+            </div>
+             <!-- App Footer -->
+            <footer class="w-full text-center py-4 border-t border-gray-200 mt-6">
+                <div class="flex justify-center items-center space-x-4 text-gray-600">
+                    <a href="http://www.nice-c.ac.th" target="_blank" class="hover:text-blue-600 font-medium transition-colors">
+                        🌐 www.nice-c.ac.th
+                    </a>
+                    <span class="text-gray-300">|</span>
+                    <a href="tel:037312568" class="hover:text-blue-600 font-medium transition-colors">
+                        📞 037-312-568
+                    </a>
+                </div>
+            </footer>
+        </div>
+
+        <!-- 2. หน้าจอหลักของแอป -->
+        <div id="app-screen" class="hidden flex-grow flex-col">
+            <header class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-lg flex items-center justify-between sticky top-0 z-10">
+                <div class="flex items-center">
+                    <div>
+                        <h1 class="text-xl font-bold leading-tight">NICE English for My Career</h1>
+                        <p id="app-title" class="text-md leading-tight"></p>
+                    </div>
+                </div>
+                <button onclick="goHome()" class="text-md font-semibold bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200">หน้าหลัก</button>
+            </header>
+
+            <!-- 2.1 เมนูหลัก -->
+            <main id="main-menu" class="flex-grow p-8 lg:p-16 flex flex-col justify-center items-center bg-slate-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-3xl">
+                    <div onclick="showModule('vocabulary-module')" class="icon-card h-52">
+                        <span class="text-8xl mb-4">🎴</span>
+                        <span class="font-bold text-gray-800 text-3xl text-center">เรียนคำศัพท์</span>
+                    </div>
+                    <div onclick="showModule('conversation-module')" class="icon-card h-52">
+                        <span class="text-8xl mb-4">💬</span>
+                        <span class="font-bold text-gray-800 text-3xl text-center">ฝึกสนทนา</span>
+                    </div>
+                </div>
+            </main>
+
+            <!-- 2.2 โมดูลเรียนคำศัพท์ -->
+            <div id="vocabulary-module" class="hidden flex-grow p-6 md:p-12 items-center justify-center bg-slate-50">
+                <div class="card w-full max-w-4xl flex flex-col md:flex-row items-center gap-8">
+                    <!-- Left Column: Image -->
+                    <div id="vocab-image-container" class="w-full md:w-1/2 h-64 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shadow-inner">
+                         <!-- Image will be loaded here -->
+                    </div>
+                    <!-- Right Column: Text & Buttons -->
+                    <div class="w-full md:w-1/2 flex flex-col items-center md:items-start">
+                        <h2 id="vocab-english" class="text-5xl lg:text-6xl font-bold text-blue-700 mb-2 text-center md:text-left"></h2>
+                        <p id="vocab-thai" class="text-3xl text-gray-600 mb-8 text-center md:text-left min-h-[40px]"></p>
+                        <div class="w-full flex flex-col space-y-4">
+                             <button onclick="speak(document.getElementById('vocab-english').innerText)" class="btn-primary flex items-center justify-center">
+                                <span class="text-2xl mr-2">🔊</span> ฟังเสียง
+                            </button>
+                            <button onclick="toggleThai('vocab-thai')" class="btn-secondary">
+                                แสดง/ซ่อนคำแปล
+                            </button>
+                            <button onclick="nextWord()" class="btn-primary">
+                                คำต่อไป
+                            </button>
+                            <button onclick="showModule('main-menu')" class="w-full text-gray-500 font-semibold py-2 mt-4 hover:text-blue-600 transition-colors">
+                                กลับเมนูหลัก
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.3 โมดูลฝึกสนทนา -->
+             <div id="conversation-module" class="hidden flex-grow p-6 md:p-12 items-center justify-center bg-slate-50">
+                 <div class="card w-full max-w-4xl flex flex-col items-stretch gap-8">
+                    <!-- Scenario Info -->
+                    <div class="w-full text-center">
+                        <p class="text-gray-500 text-md font-semibold">สถานการณ์:</p>
+                        <h3 id="convo-scenario" class="text-2xl font-bold text-gray-800"></h3>
+                    </div>
+                    
+                    <hr/>
+
+                    <div class="w-full flex flex-col md:flex-row gap-8">
+                        <!-- Left Column: Thai -->
+                        <div class="w-full md:w-1/2">
+                            <p class="text-gray-500 text-md font-semibold mb-2 text-center">สิ่งที่คุณต้องพูด (ภาษาไทย)</p>
+                            <p id="convo-thai" class="text-xl bg-gray-100 p-4 rounded-lg min-h-[100px] flex items-center justify-center text-center"></p>
+                        </div>
+                         <!-- Right Column: English -->
+                        <div class="w-full md:w-1/2">
+                            <p class="text-blue-600 text-md font-semibold mb-2 text-center">ตัวอย่างประโยค (ภาษาอังกฤษ)</p>
+                            <div id="convo-english-container" class="bg-blue-50 p-4 rounded-lg min-h-[100px] flex items-center justify-center text-center">
+                                <p id="convo-english" class="text-2xl font-semibold text-blue-800"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- Buttons -->
+                    <div class="w-full flex flex-col md:flex-row gap-4 mt-4">
+                        <button onclick="speak(document.getElementById('convo-english').innerText)" class="btn-primary flex items-center justify-center md:w-1/2">
+                            <span class="text-2xl mr-2">🔊</span> ฟังตัวอย่าง
+                        </button>
+                        <button onclick="nextScenario()" class="btn-primary md:w-1/2">
+                            สถานการณ์ต่อไป
+                        </button>
+                    </div>
+                     <button onclick="showModule('main-menu')" class="w-full text-gray-500 font-semibold py-2 mt-2 hover:text-blue-600 transition-colors">
+                        กลับเมนูหลัก
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- Database ---
+        const db = {
+            general: {
+                title: "แผนกสามัญสัมพันธ์",
+                vocabulary: [
+                    { en: "Student", th: "นักเรียน" }, { en: "Teacher", th: "ครู" }, { en: "Classroom", th: "ห้องเรียน" }, { en: "Homework", th: "การบ้าน" }, { en: "Exam", th: "การสอบ" }, { en: "Subject", th: "วิชา" }, { en: "Library", th: "ห้องสมุด" }, { en: "Computer", th: "คอมพิวเตอร์" }, { en: "Project", th: "โครงงาน" }, { en: "Presentation", th: "การนำเสนอ" }, { en: "Question", th: "คำถาม" }, { en: "Answer", th: "คำตอบ" }, { en: "Read", th: "อ่าน" }, { en: "Write", th: "เขียน" }, { en: "Listen", th: "ฟัง" }, { en: "Speak", th: "พูด" }, { en: "Friend", th: "เพื่อน" }, { en: "Group", th: "กลุ่ม" }, { en: "Learn", th: "เรียนรู้" }, { en: "Study", th: "เรียน/ศึกษา" }, { en: "Morning", th: "ตอนเช้า" }, { en: "Afternoon", th: "ตอนบ่าย" }, { en: "Hello", th: "สวัสดี" }, { en: "Goodbye", th: "ลาก่อน" }, { en: "Thank you", th: "ขอบคุณ" }, { en: "Sorry", th: "ขอโทษ" }, { en: "Please", th: "กรุณา/ได้โปรด" }, { en: "Help", th: "ช่วยเหลือ" }, { en: "Pen", th: "ปากกา" }, { en: "Book", th: "หนังสือ" }
+                ],
+                conversations: [
+                    { scenario: "การถามคำถามในห้องเรียน", th: "อาจารย์ครับ/คะ หนู/ผมไม่เข้าใจเรื่องนี้ครับ/ค่ะ", en: "Excuse me, teacher. I don't understand this topic." },
+                    { scenario: "การคุยเรื่องการบ้านกับเพื่อน", th: "เธอทำการบ้านเสร็จหรือยัง?", en: "Have you finished the homework?" },
+                    { scenario: "การแนะนำตัวเอง", th: "สวัสดี เราชื่อ...นะ ยินดีที่ได้รู้จัก", en: "Hi, my name is... It's nice to meet you." },
+                    { scenario: "การถามทางในวิทยาลัย", th: "ขอโทษนะครับ/คะ ห้องสมุดไปทางไหนครับ/คะ?", en: "Excuse me, where is the library?" }
+                ]
+            },
+            mechanic: {
+                title: "สาขาวิชาช่างยนต์",
+                vocabulary: [
+                    { en: "Engine", th: "เครื่องยนต์" }, { en: "Tire", th: "ยางรถยนต์" }, { en: "Screwdriver", th: "ไขควง" }, { en: "Wrench", th: "ประแจ" }, { en: "Oil", th: "น้ำมันเครื่อง" }, { en: "Brake", th: "เบรก" }, { en: "Battery", th: "แบตเตอรี่" }, { en: "Radiator", th: "หม้อน้ำ" }, { en: "Spark Plug", th: "หัวเทียน" }, { en: "Headlight", th: "ไฟหน้า" }, { en: "Taillight", th: "ไฟท้าย" }, { en: "Steering Wheel", th: "พวงมาลัย" }, { en: "Gear", th: "เกียร์" }, { en: "Exhaust", th: "ท่อไอเสีย" }, { en: "Fuel", th: "น้ำมันเชื้อเพลิง" }, { en: "Pliers", th: "คีม" }, { en: "Hammer", th: "ค้อน" }, { en: "Jack", th: "แม่แรง" }, { en: "Axle", th: "เพลา" }, { en: "Suspension", th: "ระบบกันสะเทือน" }, { en: "Filter", th: "ไส้กรอง" }, { en: "Hose", th: "ท่อยาง" }, { en: "Bolt", th: "น็อตตัวผู้" }, { en: "Nut", th: "น็อตตัวเมีย" }, { en: "Gauge", th: "เกจวัด" }, { en: "Coolant", th: "น้ำยาหล่อเย็น" }, { en: "Transmission", th: "ระบบส่งกำลัง" }, { en: "Alternator", th: "ไดชาร์จ" }, { en: "Fuse", th: "ฟิวส์" }, { en: "Wiper", th: "ที่ปัดน้ำฝน" }
+                ],
+                conversations: [
+                    { scenario: "ลูกค้าเข้ามาที่อู่", th: "สวัสดีครับ/ค่ะ มีอะไรให้ช่วยไหมครับ/คะ?", en: "Hello, how can I help you?" },
+                    { scenario: "ถามอาการรถ", th: "รถของคุณเป็นอะไรครับ/คะ?", en: "What's wrong with your car?" },
+                    { scenario: "แจ้งราคาค่าซ่อม", th: "ค่าซ่อมทั้งหมด 500 บาทครับ/ค่ะ", en: "The total cost is 500 baht." },
+                    { scenario: "บอกว่าซ่อมเสร็จแล้ว", th: "รถของคุณซ่อมเสร็จเรียบร้อยแล้ว", en: "Your car is ready." }
+                ]
+            },
+            computer: {
+                title: "สาขาเทคโนโลยีธุรกิจดิจิทัล",
+                vocabulary: [
+                    { en: "Keyboard", th: "แป้นพิมพ์" }, { en: "Spreadsheet", th: "โปรแกรมตารางคำนวณ" }, { en: "Email", th: "อีเมล" }, { en: "Database", th: "ฐานข้อมูล" }, { en: "Server", th: "เครื่องเซิร์ฟเวอร์" }, { en: "Mouse", th: "เมาส์" }, { en: "Monitor", th: "จอภาพ" }, { en: "Printer", th: "เครื่องพิมพ์" }, { en: "Scanner", th: "เครื่องสแกน" }, { en: "Software", th: "ซอฟต์แวร์" }, { en: "Hardware", th: "ฮาร์ดแวร์" }, { en: "Internet", th: "อินเทอร์เน็ต" }, { en: "Wi-Fi", th: "ไวไฟ" }, { en: "Username", th: "ชื่อผู้ใช้" }, { en: "Password", th: "รหัสผ่าน" }, { en: "File", th: "ไฟล์" }, { en: "Folder", th: "โฟลเดอร์" }, { en: "Download", th: "ดาวน์โหลด" }, { en: "Upload", th: "อัปโหลด" }, { en: "Website", th: "เว็บไซต์" }, { en: "Browser", th: "เบราว์เซอร์" }, { en: "Network", th: "เครือข่าย" }, { en: "Application", th: "แอปพลิเคชัน" }, { en: "Backup", th: "สำรองข้อมูล" }, { en: "Firewall", th: "ไฟร์วอลล์" }, { en: "Virus", th: "ไวรัส" }, { en: "Reboot", th: "รีบูตเครื่อง" }, { en: "Click", th: "คลิก" }, { en: "Drag", th: "ลาก" }, { en: "Save", th: "บันทึก" }
+                ],
+                conversations: [
+                    { scenario: "รับโทรศัพท์ลูกค้า", th: "สวัสดีครับ/ค่ะ บริษัท ABC ยินดีให้บริการ", en: "Hello, ABC Company, how may I help you?" },
+                    { scenario: "ถามปัญหาการใช้งาน", th: "คุณกำลังประสบปัญหาอะไรอยู่ครับ/คะ?", en: "What problem are you facing?" },
+                    { scenario: "แนะนำให้รีสตาร์ทเครื่อง", th: "ได้โปรดลองปิดและเปิดเครื่องใหม่อีกครั้ง", en: "Please try turning it off and on again." },
+                    { scenario: "ส่งอีเมลสรุปข้อมูล", th: "เดี๋ยวผม/ฉันจะส่งสรุปข้อมูลให้ทางอีเมลนะครับ/คะ", en: "I will send you a summary by email." }
+                ]
+            },
+            power: {
+                title: "สาขาวิชาไฟฟ้ากำลัง",
+                vocabulary: [
+                    { en: "Transformer", th: "หม้อแปลงไฟฟ้า" }, { en: "Circuit Breaker", th: "เบรกเกอร์" }, { en: "Generator", th: "เครื่องกำเนิดไฟฟ้า" }, { en: "Voltage", th: "แรงดันไฟฟ้า" }, { en: "Current", th: "กระแสไฟฟ้า" }, { en: "Conductor", th: "ตัวนำไฟฟ้า" }, { en: "Insulator", th: "ฉนวนไฟฟ้า" }, { en: "Power Plant", th: "โรงไฟฟ้า" }, { en: "Substation", th: "สถานีไฟฟ้าย่อย" }, { en: "Cable", th: "สายเคเบิล" }, { en: "Fuse", th: "ฟิวส์" }, { en: "Relay", th: "รีเลย์" }, { en: "Switch", th: "สวิตช์" }, { en: "Ground", th: "สายดิน" }, { en: "Motor", th: "มอเตอร์" }, { en: "Capacitor", th: "ตัวเก็บประจุ" }, { en: "Resistor", th: "ตัวต้านทาน" }, { en: "Meter", th: "มิเตอร์" }, { en: "Ammeter", th: "แอมมิเตอร์" }, { en: "Voltmeter", th: "โวลต์มิเตอร์" }, { en: "Ohm", th: "โอห์ม" }, { en: "Watt", th: "วัตต์" }, { en: "Grid", th: "สายส่งไฟฟ้า" }, { en: "Blackout", th: "ไฟฟ้าดับ" }, { en: "Power Line", th: "สายไฟฟ้า" }, { en: "PLC", th: "พีแอลซี" }, { en: "Inverter", th: "อินเวอร์เตอร์" }, { en: "Contactor", th: "คอนแทคเตอร์" }, { en: "Terminal", th: "ขั้วต่อสาย" }, { en: "Panel", th: "แผงควบคุม" }
+                ],
+                conversations: [
+                    { scenario: "แจ้งเหตุไฟฟ้าดับ", th: "ที่นี่ไฟฟ้าดับครับ/ค่ะ", en: "There is a power outage here." },
+                    { scenario: "การตรวจสอบความปลอดภัย", th: "กรุณาสวมใส่อุปกรณ์ป้องกันก่อนเริ่มงาน", en: "Please wear safety gear before starting." },
+                    { scenario: "การติดตั้งวงจรใหม่", th: "เราต้องติดตั้งเบรกเกอร์ตัวใหม่", en: "We need to install a new circuit breaker." },
+                    { scenario: "อ่านค่ามิเตอร์ไฟฟ้า", th: "ช่วยอ่านค่าที่โวลต์มิเตอร์ให้หน่อย", en: "Can you read the voltmeter for me?" }
+                ]
+            },
+            factory: {
+                title: "สาขาช่างกลโรงงาน",
+                vocabulary: [
+                    { en: "Lathe", th: "เครื่องกลึง" }, { en: "Milling Machine", th: "เครื่องกัด" }, { en: "Grinder", th: "เครื่องเจียร" }, { en: "Drill Press", th: "แท่นเจาะ" }, { en: "CNC", th: "เครื่องซีเอ็นซี" }, { en: "Gear", th: "เฟือง" }, { en: "Bearing", th: "ตลับลูกปืน" }, { en: "Shaft", th: "เพลา" }, { en: "Pump", th: "ปั๊ม" }, { en: "Valve", th: "วาล์ว" }, { en: "Conveyor Belt", th: "สายพานลำเลียง" }, { en: "Hydraulic", th: "ไฮดรอลิก" }, { en: "Pneumatic", th: "นิวเมติก" }, { en: "Lubricant", th: "สารหล่อลื่น" }, { en: "Maintenance", th: "การบำรุงรักษา" }, { en: "Assembly", th: "การประกอบ" }, { en: "Piston", th: "ลูกสูบ" }, { en: "Cylinder", th: "กระบอกสูบ" }, { en: "Machine", th: "เครื่องจักร" }, { en: "Blueprint", th: "พิมพ์เขียว" }, { en: "Torque", th: "แรงบิด" }, { en: "Compressor", th: "เครื่องอัดอากาศ" }, { en: "Gauge", th: "เกจวัด" }, { en: "Calibration", th: "การสอบเทียบ" }, { en: "Quality Control", th: "การควบคุมคุณภาพ" }, { en: "Safety Goggles", th: "แว่นตานิรภัย" }, { en: "Tool", th: "เครื่องมือ" }, { en: "Component", th: "ชิ้นส่วน" }, { en: "Repair", th: "การซ่อมแซม" }, { en: "Operation", th: "การปฏิบัติงาน" }
+                ],
+                conversations: [
+                    { scenario: "รายงานเครื่องจักรเสีย", th: "เครื่องจักรหมายเลข 5 หยุดทำงานครับ/ค่ะ", en: "Machine number 5 is down." },
+                    { scenario: "การบำรุงรักษาประจำวัน", th: "วันนี้ต้องตรวจสอบระดับน้ำมันหล่อลื่น", en: "We have to check the lubricant level today." },
+                    { scenario: "ขอเบิกอะไหล่", th: "ผม/ฉันต้องการตลับลูกปืนตัวใหม่", en: "I need a new bearing." },
+                    { scenario: "อธิบายขั้นตอนการทำงาน", th: "ขั้นแรก, เปิดเครื่องและรอให้ถึงอุณหภูมิที่กำหนด", en: "First, turn on the machine and wait for it to heat up." }
+                ]
+            },
+            electronics: {
+                title: "สาขาช่างอิเล็กทรอนิกส์",
+                vocabulary: [
+                    { en: "Resistor", th: "ตัวต้านทาน" }, { en: "Capacitor", th: "ตัวเก็บประจุ" }, { en: "Transistor", th: "ทรานซิสเตอร์" }, { en: "Diode", th: "ไดโอด" }, { en: "LED", th: "แอลอีดี" }, { en: "Integrated Circuit (IC)", th: "ไอซี" }, { en: "Printed Circuit Board (PCB)", th: "แผ่นวงจรพิมพ์" }, { en: "Solder", th: "การบัดกรี" }, { en: "Multimeter", th: "มัลติมิเตอร์" }, { en: "Oscilloscope", th: "ออสซิลโลสโคป" }, { en: "Power Supply", th: "แหล่งจ่ายไฟ" }, { en: "Signal", th: "สัญญาณ" }, { en: "Frequency", th: "ความถี่" }, { en: "Sensor", th: "เซ็นเซอร์" }, { en: "Microcontroller", th: "ไมโครคอนโทรลเลอร์" }, { en: "Schematic", th: "แผนผังวงจร" }, { en: "Debug", th: "การดีบัก" }, { en: "Amplifier", th: "เครื่องขยายเสียง" }, { en: "Switch", th: "สวิตช์" }, { en: "Relay", th: "รีเลย์" }, { en: "Connector", th: "ตัวเชื่อมต่อ" }, { en: "Digital", th: "ดิจิทัล" }, { en: "Analog", th: "แอนะล็อก" }, { en: "Logic Gate", th: "ลอจิกเกต" }, { en: "Memory", th: "หน่วยความจำ" }, { en: "Processor", th: "หน่วยประมวลผล" }, { en: "ESD", th: "ไฟฟ้าสถิต" }, { en: "Component", th: "ชิ้นส่วน" }, { en: "Troubleshoot", th: "การแก้ปัญหา" }, { en: "Prototype", th: "ต้นแบบ" }
+                ],
+                conversations: [
+                    { scenario: "การทดสอบแผงวงจร", th: "กรุณาวัดแรงดันไฟฟ้าที่จุดทดสอบนี้", en: "Please measure the voltage at this test point." },
+                    { scenario: "การบัดกรีชิ้นส่วน", th: "ระวังอย่าให้ร้อนเกินไป", en: "Be careful not to overheat it." },
+                    { scenario: "อ่านแผนผังวงจร", th: "ตัวต้านทาน R5 อยู่ตรงไหน?", en: "Where is resistor R5?" },
+                    { scenario: "การแก้ไขปัญหาอุปกรณ์", th: "อุปกรณ์นี้เปิดไม่ติด ลองเช็คแหล่งจ่ายไฟดู", en: "This device won't turn on. Let's check the power supply." }
+                ]
+            },
+            welding: {
+                title: "สาขาช่างเชื่อมโลหะ",
+                vocabulary: [
+                    { en: "Welder", th: "เครื่องเชื่อม" }, { en: "Electrode", th: "ลวดเชื่อม" }, { en: "Arc Welding", th: "การเชื่อมอาร์ค" }, { en: "MIG Welding", th: "การเชื่อมมิก" }, { en: "TIG Welding", th: "การเชื่อมทิก" }, { en: "Gas Cylinder", th: "ถังแก๊ส" }, { en: "Helmet", th: "หมวกนิรภัย" }, { en: "Gloves", th: "ถุงมือ" }, { en: "Goggles", th: "แว่นตา" }, { en: "Slag", th: "สแลก" }, { en: "Weld Bead", th: "แนวเชื่อม" }, { en: "Joint", th: "รอยต่อ" }, { en: "Metal", th: "โลหะ" }, { en: "Steel", th: "เหล็ก" }, { en: "Aluminum", th: "อะลูมิเนียม" }, { en: "Cutting Torch", th: "ชุดตัดแก๊ส" }, { en: "Plasma Cutter", th: "เครื่องตัดพลาสมา" }, { en: "Grinder", th: "เครื่องเจียร" }, { en: "Flux", th: "ฟลักซ์" }, { en: "Shielding Gas", th: "แก๊สปกคลุม" }, { en: "Amperage", th: "กระแสเชื่อม" }, { en: "Voltage", th: "แรงดันเชื่อม" }, { en: "Porosity", th: "ความพรุน" }, { en: "Crack", th: "รอยร้าว" }, { en: "Penetration", th: "การซึมลึก" }, { en: "Fabrication", th: "การประกอบชิ้นงาน" }, { en: "Safety", th: "ความปลอดภัย" }, { en: "Spark", th: "ประกายไฟ" }, { en: "Fume", th: "ควัน" }, { en: "Blueprint", th: "พิมพ์เขียว" }
+                ],
+                conversations: [
+                    { scenario: "เตรียมชิ้นงานก่อนเชื่อม", th: "ทำความสะอาดพื้นผิวโลหะก่อน", en: "Clean the metal surface first." },
+                    { scenario: "ตั้งค่าเครื่องเชื่อม", th: "ปรับกระแสเชื่อมไปที่ 100 แอมป์", en: "Set the amperage to 100 amps." },
+                    { scenario: "ตรวจสอบความปลอดภัย", th: "คุณสวมหมวกนิรภัยหรือยัง?", en: "Are you wearing your helmet?" },
+                    { scenario: "ตรวจสอบคุณภาพรอยเชื่อม", th: "แนวเชื่อมนี้ดูดีมาก ไม่มีรูพรุนเลย", en: "This weld bead looks good, no porosity." }
+                ]
+            },
+            accounting: {
+                title: "สาขาการบัญชี",
+                vocabulary: [
+                    { en: "Invoice", th: "ใบแจ้งหนี้" }, { en: "Receipt", th: "ใบเสร็จ" }, { en: "Debit", th: "เดบิต (ด้านซ้าย)" }, { en: "Credit", th: "เครดิต (ด้านขวา)" }, { en: "Balance Sheet", th: "งบดุล" }, { en: "Income Statement", th: "งบกำไรขาดทุน" }, { en: "Cash Flow", th: "กระแสเงินสด" }, { en: "Asset", th: "สินทรัพย์" }, { en: "Liability", th: "หนี้สิน" }, { en: "Equity", th: "ส่วนของผู้ถือหุ้น" }, { en: "Ledger", th: "สมุดบัญชีแยกประเภท" }, { en: "Journal", th: "สมุดรายวัน" }, { en: "Audit", th: "การตรวจสอบบัญชี" }, { en: "Tax", th: "ภาษี" }, { en: "Budget", th: "งบประมาณ" }, { en: "Expense", th: "ค่าใช้จ่าย" }, { en: "Revenue", th: "รายได้" }, { en: "Profit", th: "กำไร" }, { en: "Loss", th: "ขาดทุน" }, { en: "Depreciation", th: "ค่าเสื่อมราคา" }, { en: "Accounts Payable", th: "บัญชีเจ้าหนี้" }, { en: "Accounts Receivable", th: "บัญชีลูกหนี้" }, { en: "Payroll", th: "บัญชีเงินเดือน" }, { en: "Financial Statement", th: "งบการเงิน" }, { en: "Transaction", th: "รายการค้า" }, { en: "Reconciliation", th: "การกระทบยอด" }, { en: "Forecast", th: "การพยากรณ์" }, { en: "Capital", th: "เงินทุน" }, { en: "Interest", th: "ดอกเบี้ย" }, { en: "Balance", th: "ยอดคงเหลือ" }
+                ],
+                conversations: [
+                    { scenario: "การออกใบแจ้งหนี้", th: "ฉันต้องออกใบแจ้งหนี้สำหรับลูกค้า A", en: "I need to issue an invoice for customer A." },
+                    { scenario: "บันทึกรายการประจำวัน", th: "กรุณาบันทึกค่าใช้จ่ายนี้ในสมุดรายวัน", en: "Please record this expense in the journal." },
+                    { scenario: "การพูดคุยเรื่องงบประมาณ", th: "งบประมาณสำหรับไตรมาสนี้คือเท่าไหร่?", en: "What is the budget for this quarter?" },
+                    { scenario: "อธิบายงบกำไรขาดทุน", th: "ในเดือนนี้ บริษัทของเรามีกำไร", en: "Our company made a profit this month." }
+                ]
+            },
+            culinary: {
+                title: "สาขาคหกรรม (อาหาร)",
+                vocabulary: [
+                    { en: "Recipe", th: "สูตรอาหาร" }, { en: "Ingredient", th: "ส่วนผสม" }, { en: "Oven", th: "เตาอบ" }, { en: "Stove", th: "เตาแก๊ส" }, { en: "Mixer", th: "เครื่องผสม" }, { en: "Blender", th: "เครื่องปั่น" }, { en: "Knife", th: "มีด" }, { en: "Cutting Board", th: "เขียง" }, { en: "Pan", th: "กระทะ" }, { en: "Pot", th: "หม้อ" }, { en: "Bake", th: "อบ" }, { en: "Fry", th: "ทอด" }, { en: "Boil", th: "ต้ม" }, { en: "Steam", th: "นึ่ง" }, { en: "Flour", th: "แป้ง" }, { en: "Sugar", th: "น้ำตาล" }, { en: "Salt", th: "เกลือ" }, { en: "Pepper", th: "พริกไทย" }, { en: "Herb", th: "สมุนไพร" }, { en: "Spice", th: "เครื่องเทศ" }, { en: "Apron", th: "ผ้ากันเปื้อน" }, { en: "Chef", th: "เชฟ" }, { en: "Pastry", th: "ขนมอบ" }, { en: "Dessert", th: "ของหวาน" }, { en: "Main Course", th: "อาหารจานหลัก" }, { en: "Appetizer", th: "อาหารเรียกน้ำย่อย" }, { en: "Nutrition", th: "โภชนาการ" }, { en: "Calorie", th: "แคลอรี่" }, { en: "Grill", th: "ย่าง" }, { en: "Whisk", th: "ตะกร้อตีไข่" }
+                ],
+                conversations: [
+                    { scenario: "การทำตามสูตรอาหาร", th: "ขั้นตอนต่อไปคือการใส่แป้งลงในชามผสม", en: "The next step is to add flour to the mixing bowl." },
+                    { scenario: "อธิบายวิธีการปรุง", th: "ทอดไก่จนกระทั่งเป็นสีเหลืองทอง", en: "Fry the chicken until it is golden brown." },
+                    { scenario: "รับออเดอร์จากลูกค้า", th: "คุณต้องการสั่งอะไรครับ/คะ?", en: "What would you like to order?" },
+                    { scenario: "ตรวจสอบส่วนผสม", th: "เรามีน้ำตาลเหลือพอไหม?", en: "Do we have enough sugar left?" }
+                ]
+            }
+        };
+
+        // --- App State ---
+        let currentCareer = '';
+        let currentData = {};
+        let vocabIndex = 0;
+        let convoIndex = 0;
+
+        // --- DOM Elements ---
+        const selectionScreen = document.getElementById('selection-screen');
+        const appScreen = document.getElementById('app-screen');
+        const mainMenu = document.getElementById('main-menu');
+        const vocabModule = document.getElementById('vocabulary-module');
+        const convoModule = document.getElementById('conversation-module');
+        const appTitle = document.getElementById('app-title');
+
+        // --- Functions ---
+        
+        // Function to initialize the app based on career choice
+        function selectCareer(career) {
+            currentCareer = career;
+            currentData = db[career];
+            // Shuffle the vocabulary list for randomness
+            currentData.vocabulary = currentData.vocabulary.sort(() => Math.random() - 0.5);
+            vocabIndex = 0;
+            convoIndex = 0;
+
+            appTitle.innerText = currentData.title;
+            
+            selectionScreen.classList.add('hidden');
+            selectionScreen.classList.remove('flex');
+            appScreen.classList.remove('hidden');
+            appScreen.classList.add('flex');
+            
+            showModule('main-menu');
+        }
+
+        // Function to show a specific module (vocab, convo) and hide others
+        function showModule(moduleId) {
+            mainMenu.classList.add('hidden');
+            vocabModule.classList.add('hidden');
+            convoModule.classList.add('hidden');
+            
+            // Hide all modules before showing the selected one
+            document.querySelectorAll('#app-screen > div, #app-screen > main').forEach(el => el.classList.add('hidden'));
+
+
+            const moduleToShow = document.getElementById(moduleId);
+            moduleToShow.classList.remove('hidden');
+            moduleToShow.classList.add('flex');
+
+
+            if (moduleId === 'vocabulary-module') {
+                loadWord();
+            } else if (moduleId === 'conversation-module') {
+                loadScenario();
+            }
+        }
+        
+        // Function to return to the career selection screen
+        function goHome() {
+            appScreen.classList.add('hidden');
+            appScreen.classList.remove('flex');
+            selectionScreen.classList.remove('hidden');
+            selectionScreen.classList.add('flex');
+        }
+
+        // --- Vocabulary Module Logic ---
+        function loadWord() {
+            const vocab = currentData.vocabulary[vocabIndex];
+            const placeholderImg = `https://placehold.co/400x300/EFEFEF/333333?text=${vocab.en.replace(/\s/g, '+')}`;
+            document.getElementById('vocab-english').innerText = vocab.en;
+            const vocabThaiEl = document.getElementById('vocab-thai');
+            vocabThaiEl.innerText = vocab.th;
+            vocabThaiEl.classList.add('invisible'); // Hide translation initially
+            
+            const imageContainer = document.getElementById('vocab-image-container');
+            imageContainer.innerHTML = `<img src="${placeholderImg}" alt="${vocab.en}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x300/CCCCCC/FFFFFF?text=Image+not+found';">`;
+
+        }
+
+        function nextWord() {
+            vocabIndex = (vocabIndex + 1) % currentData.vocabulary.length;
+            loadWord();
+        }
+
+        function toggleThai(elementId) {
+            document.getElementById(elementId).classList.toggle('invisible');
+        }
+
+        // --- Conversation Module Logic ---
+        function loadScenario() {
+            const convo = currentData.conversations[convoIndex];
+            document.getElementById('convo-scenario').innerText = convo.scenario;
+            document.getElementById('convo-thai').innerText = convo.th;
+            document.getElementById('convo-english').innerText = convo.en;
+        }
+
+        function nextScenario() {
+            convoIndex = (convoIndex + 1) % currentData.conversations.length;
+            loadScenario();
+        }
+
+        // --- Speech Synthesis ---
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Stop any previous speech
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                // Do not use alert. This is a fallback.
+                console.error("Speech synthesis not supported.");
+            }
+        }
+        
+        // --- Visitor Counter Logic ---
+        // This function runs when the page is loaded to update the visitor count.
+        function updateVisitorCounter() {
+            const counterElement = document.getElementById('visitor-counter');
+            if (counterElement) {
+                // Get the current count from localStorage.
+                let count = localStorage.getItem('niceAppVisitorCount');
+
+                // If no count is stored, this is the first visit.
+                if (count === null) {
+                    count = 1;
+                } else {
+                    // Otherwise, increment the count.
+                    count = parseInt(count) + 1;
+                }
+
+                // Save the new count back to localStorage.
+                localStorage.setItem('niceAppVisitorCount', count);
+
+                // Format the number with commas for better readability.
+                const formattedCount = count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                // Display the count on the page with an icon.
+                counterElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                    </svg>
+                    ยอดเข้าชม: ${formattedCount}
+                `;
+            }
+        }
+
+        // Run the visitor counter function when the window loads.
+        window.onload = updateVisitorCounter;
+
+    </script>
+</body>
+</html>
