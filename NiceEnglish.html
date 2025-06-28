@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NICE English for My Career - แอพฝึกคำศัพท์ภาษาอังกฤษสำหรับนักเรียนอาชีวะ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .department-card {
+            transition: all 0.3s ease;
+        }
+        .department-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .vocab-card {
+            perspective: 1000px;
+            height: 250px;
+        }
+        .vocab-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .vocab-card.flipped .vocab-card-inner {
+            transform: rotateY(180deg);
+        }
+        .vocab-card-front, .vocab-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 0.75rem; /* rounded-xl */
+        }
+        .vocab-card-back {
+            transform: rotateY(180deg);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        /* Page transition styles */
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div id="headerTitle" class="flex items-center cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <h1 class="text-xl md:text-2xl font-bold">NICE English for My Career</h1>
+                </div>
+                <div class="flex items-center">
+                    <button id="statsButton" class="flex items-center mr-4 hover:text-blue-200" title="ดูสถิติ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span class="hidden md:inline">สถิติ</span>
+                    </button>
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="totalTime">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Home Page -->
+            <div id="homePage" class="page">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">เรียนรู้คำศัพท์ภาษาอังกฤษเฉพาะทาง</h2>
+                    <p class="text-lg text-gray-600">เลือกแผนกวิชาของคุณเพื่อเริ่มเรียนรู้คำศัพท์ที่จำเป็นสำหรับสาขาอาชีพ</p>
+                </div>
+                <div id="departmentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Department Cards will be injected by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Department Page -->
+            <div id="departmentPage" class="page">
+                <div class="flex justify-between items-center mb-6">
+                    <button id="backToHome" class="flex items-center mr-4 bg-white hover:bg-gray-100 text-gray-700 p-2 rounded-full shadow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <h2 id="departmentTitle" class="text-xl md:text-2xl font-bold text-gray-800 text-right"></h2>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">เกี่ยวกับแผนกวิชานี้</h3>
+                    <p id="departmentDescription" class="text-gray-600 mb-4"></p>
+                    <button id="startLearning" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg flex items-center justify-center shadow-lg text-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        เริ่มเรียนรู้ / ทบทวน
+                    </button>
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">ความก้าวหน้าของคุณ</h3>
+                        <div class="flex justify-center mb-6">
+                            <div class="relative w-40 h-40">
+                                <svg class="w-full h-full" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e6e6e6" stroke-width="10" />
+                                    <circle id="progressCircle" class="progress-ring" cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="10" stroke-dasharray="282.74" stroke-dashoffset="282.74" />
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span id="progressPercent" class="text-3xl font-bold text-gray-800">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">คำศัพท์ที่เรียนรู้แล้ว</span>
+                                <span id="learnedWords" class="font-medium text-gray-800">0/30</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="learnedWordsBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">โหมดการเรียนรู้</h3>
+                        <div class="space-y-4">
+                            <div id="selectFlashcards" class="flex items-center p-3 border-2 border-blue-500 rounded-lg bg-blue-50 cursor-pointer">
+                                <div class="bg-blue-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
+                                <div class="ml-4">
+                                    <h4 class="font-medium text-gray-800">บัตรคำศัพท์</h4>
+                                    <p class="text-sm text-gray-600">เรียนรู้คำศัพท์ผ่านบัตรคำ</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 border border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed opacity-60">
+                                <div class="bg-gray-200 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                                <div class="ml-4">
+                                    <h4 class="font-medium text-gray-800">แบบทดสอบ (เร็วๆ นี้)</h4>
+                                    <p class="text-sm text-gray-600">ทดสอบความรู้ของคุณ</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Page -->
+            <div id="learningPage" class="page">
+                 <div class="flex justify-between items-center mb-6">
+                    <button id="backToDepartment" class="mr-4 bg-white hover:bg-gray-100 text-gray-700 p-2 rounded-full shadow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center">
+                        <span id="currentCardIndex">1</span>
+                        <span class="mx-1">/</span>
+                        <span id="totalCards">30</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-full max-w-lg">
+                        <div id="vocabCard" class="vocab-card bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer mx-auto">
+                            <div class="vocab-card-inner">
+                                <div class="vocab-card-front bg-gradient-to-br from-blue-500 to-blue-700 text-white p-8">
+                                    <h3 id="vocabWord" class="text-4xl font-bold mb-4 text-center"></h3>
+                                    <p id="vocabPronunciation" class="text-xl text-center"></p>
+                                    <div class="mt-4 flex justify-center">
+                                        <button id="playPronunciation" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-full flex items-center text-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.465a5 5 0 001.06-7.072m-2.829 9.9a9 9 0 010-12.728" /></svg>
+                                            ฟังเสียง
+                                        </button>
+                                    </div>
+                                    <p class="text-center mt-6 text-sm text-white text-opacity-80">คลิกเพื่อดูคำแปล</p>
+                                </div>
+                                <div class="vocab-card-back bg-white p-6 text-center">
+                                    <h4 class="text-lg font-medium text-gray-500 mb-1">คำแปล</h4>
+                                    <h3 id="vocabTranslation" class="text-3xl font-bold mb-3 text-gray-800"></h3>
+                                    <div class="text-left space-y-3">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-600">ตัวอย่างประโยค:</h4>
+                                            <p id="vocabExample" class="text-gray-800"></p>
+                                            <p id="vocabExampleTranslation" class="text-gray-500 italic text-sm"></p>
+                                        </div>
+                                    </div>
+                                     <p class="text-center mt-4 text-sm text-gray-500">คลิกเพื่อกลับไปดูคำศัพท์</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-center space-x-4">
+                             <button id="prevCard" class="bg-white hover:bg-gray-200 text-gray-700 p-3 rounded-full shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+                             <button id="markAsLearned" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg flex items-center shadow-lg transform hover:scale-105 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                ฉันจำได้แล้ว
+                            </button>
+                            <button id="nextCard" class="bg-white hover:bg-gray-200 text-gray-700 p-3 rounded-full shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics Page -->
+            <div id="statsPage" class="page">
+                 <div class="flex justify-between items-center mb-6">
+                    <button id="backFromStats" class="flex items-center mr-4 bg-white hover:bg-gray-100 text-gray-700 p-2 rounded-full shadow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-right">สถิติการใช้งานโดยรวม</h2>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">ความก้าวหน้าทั้งหมด</h3>
+                         <div class="grid grid-cols-2 gap-4 text-center mb-6">
+                            <div>
+                                <p class="text-3xl font-bold text-blue-600" id="totalLearnedStat">0</p>
+                                <p class="text-sm text-gray-500">คำที่เรียนแล้ว</p>
+                            </div>
+                             <div>
+                                <p class="text-3xl font-bold text-gray-700" id="totalWordsStat">0</p>
+                                <p class="text-sm text-gray-500">คำทั้งหมด</p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                            <div id="totalLearnedWordsBar" class="bg-blue-600 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold" style="width: 0%"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 text-center">คุณเรียนรู้ไปแล้ว <span id="totalLearnedPercent">0</span>% ของคำศัพท์ทั้งหมด</p>
+                    </div>
+                     <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">เวลาที่ใช้เรียน</h3>
+                         <div class="flex items-center justify-center text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="text-3xl font-bold text-green-600" id="totalTimeSpentStat">00:00:00</p>
+                                <p class="text-sm text-gray-500">ชั่วโมง : นาที : วินาที</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">สรุปรายแผนกวิชา</h3>
+                        <canvas id="statsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completion Page -->
+            <div id="completionPage" class="page text-center">
+                 <div class="bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+                    <svg class="w-24 h-24 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-6 mb-2">ยอดเยี่ยมมาก!</h2>
+                    <p id="completionMessage" class="text-lg text-gray-600 mb-6">คุณได้เรียนรู้คำศัพท์ชุดนี้ครบแล้ว</p>
+                    <div class="space-y-4">
+                        <button id="restartSet" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center justify-center text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            ทบทวนอีกครั้ง
+                        </button>
+                         <button id="backToHomeFromCompletion" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg flex items-center justify-center text-lg">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                            กลับสู่หน้าหลัก
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- DATA ---
+    const vocabData = {
+        automotive: {
+            name: "แผนกวิชาช่างยนต์",
+            description: "เรียนรู้คำศัพท์สำคัญที่เกี่ยวข้องกับเครื่องยนต์, ชิ้นส่วนยานยนต์, และกระบวนการซ่อมบำรุง เพื่อเตรียมพร้อมสู่การเป็นช่างยนต์มืออาชีพ",
+            words: [
+                { word: "Engine", pronunciation: "/ˈen.dʒɪn/", translation: "เครื่องยนต์", example: "The mechanic is inspecting the car's engine.", example_th: "ช่างกำลังตรวจสอบเครื่องยนต์ของรถ" },
+                { word: "Brake", pronunciation: "/breɪk/", translation: "เบรก", example: "You should check your brakes regularly.", example_th: "คุณควรตรวจสอบเบรกของคุณอย่างสม่ำเสมอ" },
+                { word: "Tire", pronunciation: "/taɪər/", translation: "ยางรถยนต์", example: "This tire has low pressure.", example_th: "ยางเส้นนี้มีแรงดันลมต่ำ" },
+                { word: "Transmission", pronunciation: "/trænsˈmɪʃ.ən/", translation: "ระบบเกียร์", example: "The car has an automatic transmission.", example_th: "รถคันนี้มีระบบเกียร์อัตโนมัติ" },
+                { word: "Spark Plug", pronunciation: "/spɑːrk plʌɡ/", translation: "หัวเทียน", example: "A faulty spark plug can cause misfires.", example_th: "หัวเทียนที่ชำรุดอาจทำให้เกิดการจุดระเบิดที่ผิดพลาด" },
+                { word: "Radiator", pronunciation: "/ˈreɪ.di.eɪ.tər/", translation: "หม้อน้ำ", example: "The radiator helps to cool the engine.", example_th: "หม้อน้ำช่วยระบายความร้อนเครื่องยนต์" },
+                { word: "Alternator", pronunciation: "/ˈɔːl.tə.neɪ.tər/", translation: "ไดชาร์จ", example: "The alternator charges the battery.", example_th: "ไดชาร์จทำหน้าที่ชาร์จแบตเตอรี่" },
+                { word: "Suspension", pronunciation: "/səˈspen.ʃən/", translation: "ระบบกันสะเทือน", example: "This car has a very smooth suspension.", example_th: "รถคันนี้มีระบบกันสะเทือนที่นุ่มนวลมาก" },
+                { word: "Exhaust", pronunciation: "/ɪɡˈzɔːst/", translation: "ท่อไอเสีย", example: "The exhaust pipe is rusty.", example_th: "ท่อไอเสียขึ้นสนิม" },
+                { word: "Piston", pronunciation: "/ˈpɪs.tən/", translation: "ลูกสูบ", example: "The engine has four pistons.", example_th: "เครื่องยนต์มีสี่ลูกสูบ" },
+                { word: "Clutch", pronunciation: "/klʌtʃ/", translation: "คลัตช์", example: "He needs to replace the clutch on his car.", example_th: "เขาต้องเปลี่ยนคลัตช์รถของเขา" },
+                { word: "Axle", pronunciation: "/ˈæk.səl/", translation: "เพลา", example: "The front axle is broken.", example_th: "เพลาหน้าหัก" },
+                { word: "Chassis", pronunciation: "/ˈʃæs.i/", translation: "โครงรถ", example: "The chassis provides the main support for the vehicle.", example_th: "โครงรถเป็นส่วนรองรับหลักของยานพาหนะ" },
+                { word: "Carburetor", pronunciation: "/ˌkɑː.bjəˈret.ər/", translation: "คาร์บูเรเตอร์", example: "Older cars often have a carburetor.", example_th: "รถรุ่นเก่ามักจะมีคาร์บูเรเตอร์" },
+                { word: "Fuel Injector", pronunciation: "/fjuːəl ɪnˈdʒek.tər/", translation: "หัวฉีดน้ำมัน", example: "Modern engines use fuel injectors for better efficiency.", example_th: "เครื่องยนต์สมัยใหม่ใช้หัวฉีดน้ำมันเพื่อประสิทธิภาพที่ดีขึ้น" },
+                { word: "Gasket", pronunciation: "/ˈɡæs.kɪt/", translation: "ปะเก็น", example: "A blown head gasket can cause major engine damage.", example_th: "ปะเก็นฝาสูบที่ชำรุดอาจทำให้เครื่องยนต์เสียหายอย่างหนักได้" },
+                { word: "Steering Wheel", pronunciation: "/ˈstɪə.rɪŋ wiːl/", translation: "พวงมาลัย", example: "Hold the steering wheel with both hands.", example_th: "จับพวงมาลัยด้วยมือทั้งสองข้าง" },
+                { word: "Dashboard", pronunciation: "/ˈdæʃ.bɔːd/", translation: "แผงหน้าปัด", example: "A warning light appeared on the dashboard.", example_th: "ไฟเตือนปรากฏขึ้นบนแผงหน้าปัด" },
+                { word: "Muffler", pronunciation: "/ˈmʌf.lər/", translation: "หม้อพักไอเสีย", example: "The muffler reduces the noise from the exhaust.", example_th: "หม้อพักไอเสียช่วยลดเสียงจากท่อไอเสีย" },
+                { word: "Catalytic Converter", pronunciation: "/ˌkæt.ə.lɪt.ɪk kənˈvɜː.tər/", translation: "เครื่องฟอกไอเสีย", example: "The catalytic converter helps reduce pollution.", example_th: "เครื่องฟอกไอเสียช่วยลดมลพิษ" },
+                { word: "Oil Filter", pronunciation: "/ɔɪl ˈfɪl.tər/", translation: "ไส้กรองน้ำมันเครื่อง", example: "You should change the oil filter regularly.", example_th: "คุณควรเปลี่ยนไส้กรองน้ำมันเครื่องเป็นประจำ" },
+                { word: "Air Filter", pronunciation: "/eər ˈfɪl.tər/", translation: "ไส้กรองอากาศ", example: "A clean air filter improves engine performance.", example_th: "ไส้กรองอากาศที่สะอาดช่วยเพิ่มประสิทธิภาพของเครื่องยนต์" },
+                { word: "Timing Belt", pronunciation: "/ˈtaɪ.mɪŋ belt/", translation: "สายพานไทม์มิ่ง", example: "The timing belt needs to be replaced every 100,000 kilometers.", example_th: "ต้องเปลี่ยนสายพานไทม์มิ่งทุกๆ 100,000 กิโลเมตร" },
+                { word: "Cylinder", pronunciation: "/ˈsɪl.ɪn.dər/", translation: "กระบอกสูบ", example: "This is a V8 engine, which means it has eight cylinders.", example_th: "นี่คือเครื่องยนต์ V8 ซึ่งหมายความว่ามีแปดกระบอกสูบ" },
+                { word: "Camshaft", pronunciation: "/ˈkæm.ʃɑːft/", translation: "เพลาลูกเบี้ยว", example: "The camshaft controls the engine's valves.", example_th: "เพลาลูกเบี้ยวควบคุมวาล์วของเครื่องยนต์" },
+                { word: "Crankshaft", pronunciation: "/ˈkræŋk.ʃɑːft/", translation: "เพลาข้อเหวี่ยง", example: "The crankshaft converts piston motion into rotation.", example_th: "เพลาข้อเหวี่ยงเปลี่ยนการเคลื่อนที่ของลูกสูบเป็นการหมุน" },
+                { word: "Differential", pronunciation: "/ˌdɪf.əˈren.ʃəl/", translation: "เฟืองท้าย", example: "The differential allows the wheels to turn at different speeds.", example_th: "เฟืองท้ายช่วยให้ล้อหมุนด้วยความเร็วที่แตกต่างกันได้" },
+                { word: "Ignition Coil", pronunciation: "/ɪɡˈnɪʃ.ən kɔɪl/", translation: "คอยล์จุดระเบิด", example: "The ignition coil provides high voltage to the spark plugs.", example_th: "คอยล์จุดระเบิดจ่ายไฟฟ้าแรงสูงไปยังหัวเทียน" },
+                { word: "Battery", pronunciation: "/ˈbæt.ər.i/", translation: "แบตเตอรี่", example: "The car won't start because the battery is dead.", example_th: "รถสตาร์ทไม่ติดเพราะแบตเตอรี่หมด" },
+                { word: "Headlight", pronunciation: "/ˈhed.laɪt/", translation: "ไฟหน้า", example: "One of the headlights is not working.", example_th: "ไฟหน้าดวงหนึ่งไม่ทำงาน" }
+            ]
+        },
+        machining: {
+            name: "แผนกวิชาช่างกลโรงงาน",
+            description: "เรียนรู้คำศัพท์เกี่ยวกับเครื่องจักรกล, เครื่องมือวัด, และกระบวนการผลิตในงานอุตสาหกรรม เช่น การกลึง, การกัด, และการเจาะ",
+            words: [
+                { word: "Lathe", pronunciation: "/leɪð/", translation: "เครื่องกลึง", example: "The operator uses a lathe to shape the metal part.", example_th: "ผู้ปฏิบัติงานใช้เครื่องกลึงเพื่อขึ้นรูปชิ้นส่วนโลหะ" },
+                { word: "Milling Machine", pronunciation: "/ˈmɪl.ɪŋ məˌʃiːn/", translation: "เครื่องกัด", example: "A milling machine cuts flat surfaces.", example_th: "เครื่องกัดใช้สำหรับตัดพื้นผิวให้เรียบ" },
+                { word: "Caliper", pronunciation: "/ˈkæl.ɪ.pər/", translation: "เวอร์เนียร์คาลิปเปอร์", example: "Use a caliper to measure the diameter.", example_th: "ใช้เวอร์เนียร์คาลิปเปอร์เพื่อวัดเส้นผ่านศูนย์กลาง" },
+                { word: "Blueprint", pronunciation: "/ˈbluː.prɪnt/", translation: "พิมพ์เขียว", example: "Follow the blueprint carefully.", example_th: "ปฏิบัติตามพิมพ์เขียวอย่างระมัดระวัง" },
+                { word: "Tolerance", pronunciation: "/ˈtɒl.ər.əns/", translation: "ค่าพิกัดความเผื่อ", example: "This part must be machined to a tight tolerance.", example_th: "ชิ้นส่วนนี้ต้องถูกตัดเฉือนให้ได้ค่าพิกัดความเผื่อที่แม่นยำ" },
+                { word: "Grinding", pronunciation: "/ˈɡraɪn.dɪŋ/", translation: "การเจียระไน", example: "Surface grinding creates a smooth finish.", example_th: "การเจียระไนผิวหน้าทำให้เกิดผิวสำเร็จที่เรียบ" },
+                { word: "CNC", pronunciation: "/ˌsiː.enˈsiː/", translation: "ซีเอ็นซี", example: "CNC machines are controlled by a computer.", example_th: "เครื่องจักรซีเอ็นซีถูกควบคุมโดยคอมพิวเตอร์" },
+                { word: "Drill Bit", pronunciation: "/drɪl bɪt/", translation: "ดอกสว่าน", example: "You need a sharp drill bit for this material.", example_th: "คุณต้องใช้ดอกสว่านที่คมสำหรับวัสดุนี้" },
+                { word: "Micrometer", pronunciation: "/maɪˈkrɒm.ɪ.tər/", translation: "ไมโครมิเตอร์", example: "A micrometer provides very precise measurements.", example_th: "ไมโครมิเตอร์ให้การวัดที่แม่นยำมาก" },
+                { word: "Chuck", pronunciation: "/tʃʌk/", translation: "หัวจับ", example: "Secure the workpiece in the chuck.", example_th: "จับชิ้นงานในหัวจับให้แน่น" },
+                { word: "Coolant", pronunciation: "/ˈkuː.lənt/", translation: "สารหล่อเย็น", example: "Coolant prevents the tool from overheating.", example_th: "สารหล่อเย็นช่วยป้องกันไม่ให้เครื่องมือร้อนเกินไป" },
+                { word: "Spindle", pronunciation: "/ˈspɪn.dəl/", translation: "แกนหมุน", example: "The spindle rotates the cutting tool.", example_th: "แกนหมุนทำหน้าที่หมุนเครื่องมือตัด" },
+                { word: "Vise", pronunciation: "/vaɪs/", translation: "ปากกาจับชิ้นงาน", example: "Clamp the part firmly in the vise.", example_th: "หนีบชิ้นส่วนให้แน่นในปากกาจับชิ้นงาน" },
+                { word: "Gauge", pronunciation: "/ɡeɪdʒ/", translation: "เกจวัด", example: "Use a thread gauge to check the pitch.", example_th: "ใช้เกจวัดเกลียวเพื่อตรวจสอบระยะพิตช์" },
+                { word: "Gear", pronunciation: "/ɡɪər/", translation: "เฟือง", example: "The gears transfer power from the motor.", example_th: "เฟืองทำหน้าที่ส่งกำลังจากมอเตอร์" },
+                { word: "Bearing", pronunciation: "/ˈbeə.rɪŋ/", translation: "ตลับลูกปืน", example: "The machine needs a new bearing.", example_th: "เครื่องจักรต้องการตลับลูกปืนใหม่" },
+                { word: "Shaft", pronunciation: "/ʃɑːft/", translation: "เพลา", example: "The motor is connected to the shaft.", example_th: "มอเตอร์เชื่อมต่อกับเพลา" },
+                { word: "CAD", pronunciation: "/kæd/", translation: "แคด (การออกแบบโดยใช้คอมพิวเตอร์ช่วย)", example: "The design was created using CAD software.", example_th: "การออกแบบถูกสร้างขึ้นโดยใช้ซอฟต์แวร์แคด" },
+                { word: "CAM", pronunciation: "/kæm/", translation: "แคม (การผลิตโดยใช้คอมพิวเตอร์ช่วย)", example: "CAM software generates the toolpaths for the CNC machine.", example_th: "ซอฟต์แวร์แคมสร้างเส้นทางการเดินของเครื่องมือสำหรับเครื่องซีเอ็นซี" },
+                { word: "Workpiece", pronunciation: "/ˈwɜːk.piːs/", translation: "ชิ้นงาน", example: "The workpiece is made of aluminum.", example_th: "ชิ้นงานทำจากอลูมิเนียม" },
+                { word: "Cutting Tool", pronunciation: "/ˈkʌt.ɪŋ tuːl/", translation: "เครื่องมือตัด", example: "The cutting tool must be replaced when it becomes dull.", example_th: "ต้องเปลี่ยนเครื่องมือตัดเมื่อมันทื่อ" },
+                { word: "Feed Rate", pronunciation: "/fiːd reɪt/", translation: "อัตราป้อน", example: "A higher feed rate reduces machining time.", example_th: "อัตราป้อนที่สูงขึ้นช่วยลดเวลาในการตัดเฉือน" },
+                { word: "Depth of Cut", pronunciation: "/depθ əv kʌt/", translation: "ระยะกินลึก", example: "Be careful not to exceed the recommended depth of cut.", example_th: "ระวังอย่าให้เกินระยะกินลึกที่แนะนำ" },
+                { word: "RPM", pronunciation: "/ˌɑː.piːˈem/", translation: "รอบต่อนาที", example: "Set the spindle to 1200 RPM.", example_th: "ตั้งค่าแกนหมุนไปที่ 1200 รอบต่อนาที" },
+                { word: "Boring", pronunciation: "/ˈbɔː.rɪŋ/", translation: "การคว้าน", example: "Boring is used to enlarge an existing hole.", example_th: "การคว้านใช้เพื่อขยายรูที่มีอยู่" },
+                { word: "Reaming", pronunciation: "/ˈriː.mɪŋ/", translation: "การรีม", example: "Reaming creates a hole with a very precise diameter.", example_th: "การรีมสร้างรูที่มีเส้นผ่านศูนย์กลางที่แม่นยำมาก" },
+                { word: "Tapping", pronunciation: "/ˈtæp.ɪŋ/", translation: "การต๊าปเกลียว", example: "Tapping is the process of cutting internal threads.", example_th: "การต๊าปเกลียวคือกระบวนการทำเกลียวใน" },
+                { word: "Fixture", pronunciation: "/ˈfɪks.tʃər/", translation: "อุปกรณ์จับยึด", example: "A custom fixture was made to hold the part.", example_th: "มีการสร้างอุปกรณ์จับยึดแบบกำหนดเองเพื่อยึดชิ้นส่วน" },
+                { word: "Jig", pronunciation: "/dʒɪɡ/", translation: "จิ๊ก (อุปกรณ์นำเจาะ)", example: "A drill jig ensures the holes are in the correct position.", example_th: "จิ๊กนำเจาะช่วยให้แน่ใจว่ารูอยู่ในตำแหน่งที่ถูกต้อง" },
+                { word: "Automation", pronunciation: "/ˌɔː.təˈmeɪ.ʃən/", translation: "ระบบอัตโนมัติ", example: "Automation has increased productivity in the factory.", example_th: "ระบบอัตโนมัติได้เพิ่มผลผลิตในโรงงาน" }
+            ]
+        },
+        welding: {
+            name: "แผนกวิชาช่างเชื่อมโลหะ",
+            description: "เรียนรู้คำศัพท์เฉพาะทางสำหรับงานเชื่อม, ชนิดของลวดเชื่อม, อุปกรณ์ความปลอดภัย, และเทคนิคการเชื่อมโลหะในรูปแบบต่างๆ",
+            words: [
+                { word: "Welding", pronunciation: "/ˈwel.dɪŋ/", translation: "การเชื่อม", example: "Welding requires protective gear.", example_th: "การเชื่อมจำเป็นต้องมีอุปกรณ์ป้องกัน" },
+                { word: "Electrode", pronunciation: "/iˈlek.troʊd/", translation: "ลวดเชื่อม", example: "Choose the correct electrode for the job.", example_th: "เลือกขนาดลวดเชื่อมให้ถูกต้องกับงาน" },
+                { word: "Helmet", pronunciation: "/ˈhel.mət/", translation: "หน้ากากเชื่อม", example: "Always wear a welding helmet.", example_th: "สวมหน้ากากเชื่อมเสมอ" },
+                { word: "Arc", pronunciation: "/ɑːrk/", translation: "อาร์ค", example: "The electric arc melts the metal.", example_th: "อาร์คไฟฟ้าทำให้โลหะหลอมละลาย" },
+                { word: "Shielding Gas", pronunciation: "/ˈʃiːl.dɪŋ ɡæs/", translation: "แก๊สปกคลุม", example: "Shielding gas protects the weld area from contamination.", example_th: "แก๊สปกคลุมช่วยป้องกันแนวเชื่อมจากการปนเปื้อน" },
+                { word: "MIG Welding", pronunciation: "/mɪɡ ˈwel.dɪŋ/", translation: "การเชื่อมมิก", example: "MIG welding is fast and easy to learn.", example_th: "การเชื่อมมิกนั้นรวดเร็วและเรียนรู้ง่าย" },
+                { word: "TIG Welding", pronunciation: "/tɪɡ ˈwel.dɪŋ/", translation: "การเชื่อมทิก", example: "TIG welding produces high-quality welds.", example_th: "การเชื่อมทิกให้แนวเชื่อมคุณภาพสูง" },
+                { word: "Plasma Cutting", pronunciation: "/ˈplæz.mə ˈkʌt.ɪŋ/", translation: "การตัดด้วยพลาสมา", example: "Plasma cutting can cut through thick metal.", example_th: "การตัดด้วยพลาสมาสามารถตัดผ่านโลหะหนาได้" },
+                { word: "Filler Metal", pronunciation: "/ˈfɪl.ər ˈmet.əl/", translation: "ลวดเติม", example: "Add filler metal to the weld pool.", example_th: "เติมลวดเติมลงในบ่อหลอมละลาย" },
+                { word: "Weld Bead", pronunciation: "/weld biːd/", translation: "แนวเชื่อม", example: "He made a clean and consistent weld bead.", example_th: "เขาทำแนวเชื่อมที่สะอาดและสม่ำเสมอ" },
+                { word: "Joint", pronunciation: "/dʒɔɪnt/", translation: "รอยต่อ", example: "There are different types of weld joints, like butt and lap joints.", example_th: "มีรอยต่อเชื่อมหลายประเภท เช่น รอยต่อชนและรอยต่อเกย" },
+                { word: "Slag", pronunciation: "/slæɡ/", translation: "สแลก", example: "You need to chip the slag off the weld.", example_th: "คุณต้องเคาะสแลกออกจากแนวเชื่อม" },
+                { word: "Porosity", pronunciation: "/ˌpɔːˈrɒs.ə.ti/", translation: "รูพรุน", example: "Gas trapped in the weld causes porosity.", example_th: "แก๊สที่ติดอยู่ในแนวเชื่อมทำให้เกิดรูพรุน" },
+                { word: "Penetration", pronunciation: "/ˌpen.ɪˈtreɪ.ʃən/", translation: "การซึมลึก", example: "Good penetration is crucial for a strong weld.", example_th: "การซึมลึกที่ดีมีความสำคัญต่อแนวเชื่อมที่แข็งแรง" },
+                { word: "Amperage", pronunciation: "/ˈæm.pər.ɪdʒ/", translation: "กระแสเชื่อม", example: "Set the correct amperage for the thickness of the metal.", example_th: "ตั้งค่ากระแสเชื่อมที่ถูกต้องสำหรับความหนาของโลหะ" },
+                { word: "Voltage", pronunciation: "/ˈvoʊl.tɪdʒ/", translation: "แรงดันเชื่อม", example: "The voltage affects the shape of the arc.", example_th: "แรงดันเชื่อมมีผลต่อรูปร่างของอาร์ค" },
+                { word: "Duty Cycle", pronunciation: "/ˈdʒuː.ti ˈsaɪ.kəl/", translation: "รอบการทำงาน", example: "This welder has a 60% duty cycle.", example_th: "เครื่องเชื่อมนี้มีรอบการทำงาน 60%" },
+                { word: "Ground Clamp", pronunciation: "/ɡraʊnd klæmp/", translation: "คีมจับสายดิน", example: "Attach the ground clamp to the workpiece.", example_th: "ต่อคีมจับสายดินเข้ากับชิ้นงาน" },
+                { word: "Goggles", pronunciation: "/ˈɡɒɡ.əlz/", translation: "แว่นตานิรภัย", example: "Wear safety goggles at all times.", example_th: "สวมแว่นตานิรภัยตลอดเวลา" },
+                { word: "Gloves", pronunciation: "/ɡlʌvz/", translation: "ถุงมือ", example: "Welding gloves protect your hands from heat and sparks.", example_th: "ถุงมือเชื่อมช่วยป้องกันมือของคุณจากความร้อนและประกายไฟ" },
+                { word: "Fumes", pronunciation: "/fjuːmz/", translation: "ควันเชื่อม", example: "Ensure good ventilation to avoid inhaling fumes.", example_th: "ตรวจสอบให้แน่ใจว่ามีการระบายอากาศที่ดีเพื่อหลีกเลี่ยงการสูดดมควันเชื่อม" },
+                { word: "Distortion", pronunciation: "/dɪˈstɔː.ʃən/", translation: "การบิดงอ", example: "Heat from welding can cause distortion.", example_th: "ความร้อนจากการเชื่อมอาจทำให้เกิดการบิดงอได้" },
+                { word: "Tack Weld", pronunciation: "/tæk weld/", translation: "การเชื่อมยึด", example: "Use tack welds to hold the parts in place before final welding.", example_th: "ใช้การเชื่อมยึดเพื่อยึดชิ้นส่วนให้อยู่กับที่ก่อนการเชื่อมจริง" },
+                { word: "Root Pass", pronunciation: "/ruːt pɑːs/", translation: "การเชื่อมเที่ยวแรก", example: "The root pass is the first and most critical weld bead.", example_th: "การเชื่อมเที่ยวแรกเป็นแนวเชื่อมแรกและสำคัญที่สุด" },
+                { word: "Weaving", pronunciation: "/ˈwiː.vɪŋ/", translation: "การส่ายลวดเชื่อม", example: "Weaving creates a wider weld bead.", example_th: "การส่ายลวดเชื่อมสร้างแนวเชื่อมที่กว้างขึ้น" },
+                { "word": "Backing", "pronunciation": "/ˈbæk.ɪŋ/", "translation": "วัสดุรองหลัง", "example": "A copper backing bar can help control penetration.", "example_th": "แท่งทองแดงรองหลังสามารถช่วยควบคุมการซึมลึกได้" },
+                { "word": "Crater", "pronunciation": "/ˈkreɪ.tər/", "translation": "แอ่งปลายแนว", "example": "Fill the crater at the end of the weld to prevent cracking.", "example_th": "เติมแอ่งปลายแนวเชื่อมเพื่อป้องกันการแตกร้าว" },
+                { "word": "Flux", "pronunciation": "/flʌks/", "translation": "ฟลักซ์", "example": "The flux coating on the electrode creates shielding gas.", "example_th": "สารพอกหุ้มบนลวดเชื่อมสร้างแก๊สปกคลุม" },
+                { "word": "Gouging", "pronunciation": "/ˈɡaʊ.dʒɪŋ/", "translation": "การเซาะร่อง", "example": "Arc gouging is used to remove old welds.", "example_th": "การเซาะร่องด้วยอาร์คใช้เพื่อกำจัดแนวเชื่อมเก่า" },
+                { "word": "Inert Gas", "pronunciation": "/ɪˈnɜːt ɡæs/", "translation": "แก๊สเฉื่อย", "example": "Argon and helium are common inert gases used in welding.", "example_th": "อาร์กอนและฮีเลียมเป็นแก๊สเฉื่อยที่ใช้กันทั่วไปในการเชื่อม" }
+            ]
+        },
+        electrical: {
+            name: "แผนกวิชาไฟฟ้ากำลัง",
+            description: "เรียนรู้คำศัพท์เกี่ยวกับระบบไฟฟ้า, วงจรไฟฟ้า, อุปกรณ์ไฟฟ้า, และมาตรฐานความปลอดภัยสำหรับงานติดตั้งและซ่อมบำรุง",
+             words: [
+                { word: "Circuit", pronunciation: "/ˈsɜː.kɪt/", translation: "วงจรไฟฟ้า", example: "An open circuit will not conduct electricity.", example_th: "วงจรเปิดจะไม่นำไฟฟ้า" },
+                { word: "Voltage", pronunciation: "/ˈvoʊl.tɪdʒ/", translation: "แรงดันไฟฟ้า", example: "The standard voltage here is 220 volts.", example_th: "แรงดันไฟฟ้ามาตรฐานที่นี่คือ 220 โวลต์" },
+                { word: "Current", pronunciation: "/ˈkʌr.ənt/", translation: "กระแสไฟฟ้า", example: "High current can be dangerous.", example_th: "กระแสไฟฟ้าสูงอาจเป็นอันตรายได้" },
+                { word: "Transformer", pronunciation: "/trænsˈfɔː.mər/", translation: "หม้อแปลงไฟฟ้า", example: "A transformer can step up or step down voltage.", example_th: "หม้อแปลงสามารถเพิ่มหรือลดแรงดันไฟฟ้าได้" },
+                { word: "Fuse", pronunciation: "/fjuːz/", translation: "ฟิวส์", example: "The fuse blew and the lights went out.", example_th: "ฟิวส์ขาดและไฟก็ดับ" },
+                { word: "Conductor", pronunciation: "/kənˈdʌk.tər/", translation: "ตัวนำไฟฟ้า", example: "Copper is an excellent conductor.", example_th: "ทองแดงเป็นตัวนำไฟฟ้าที่ดีเยี่ยม" },
+                { word: "Insulator", pronunciation: "/ˈɪn.sjə.leɪ.tər/", translation: "ฉนวนไฟฟ้า", example: "Rubber is a good insulator.", example_th: "ยางเป็นฉนวนไฟฟ้าที่ดี" },
+                { word: "Switch", pronunciation: "/swɪtʃ/", translation: "สวิตช์", example: "Turn off the light switch.", example_th: "ปิดสวิตช์ไฟ" },
+                { word: "Relay", pronunciation: "/ˈriː.leɪ/", translation: "รีเลย์", example: "A relay is an electrically operated switch.", example_th: "รีเลย์เป็นสวิตช์ที่ทำงานด้วยไฟฟ้า" },
+                { word: "Generator", pronunciation: "/ˈdʒen.ə.reɪ.tər/", translation: "เครื่องกำเนิดไฟฟ้า", example: "The hospital has a backup generator.", example_th: "โรงพยาบาลมีเครื่องกำเนิดไฟฟ้าสำรอง" },
+                { word: "Motor", pronunciation: "/ˈməʊ.tər/", translation: "มอเตอร์", example: "The electric motor powers the fan.", example_th: "มอเตอร์ไฟฟ้าให้กำลังแก่พัดลม" },
+                { word: "AC (Alternating Current)", pronunciation: "/ˌeɪˈsiː/", translation: "ไฟฟ้ากระแสสลับ", example: "Our homes use alternating current.", example_th: "บ้านของเราใช้ไฟฟ้ากระแสสลับ" },
+                { word: "DC (Direct Current)", pronunciation: "/ˌdiːˈsiː/", translation: "ไฟฟ้ากระแสตรง", example: "Batteries provide direct current.", example_th: "แบตเตอรี่ให้ไฟฟ้ากระแสตรง" },
+                { word: "Ground", pronunciation: "/ɡraʊnd/", translation: "สายดิน", example: "The appliance must be connected to the ground.", example_th: "เครื่องใช้ไฟฟ้าต้องเชื่อมต่อกับสายดิน" },
+                { word: "Circuit Breaker", pronunciation: "/ˈsɜː.kɪt ˈbreɪ.kər/", translation: "เบรกเกอร์", example: "The circuit breaker tripped, cutting off the power.", example_th: "เบรกเกอร์ตัดวงจร ทำให้ไฟฟ้าดับ" },
+                { word: "Outlet", pronunciation: "/ˈaʊt.let/", translation: "เต้ารับ", example: "Plug the cord into the wall outlet.", example_th: "เสียบสายไฟเข้ากับเต้ารับที่ผนัง" },
+                { word: "Watt", pronunciation: "/wɒt/", translation: "วัตต์", example: "This light bulb is 60 watts.", example_th: "หลอดไฟนี้ 60 วัตต์" },
+                { word: "Ampere", pronunciation: "/ˈæm.peər/", translation: "แอมแปร์", example: "The fuse is rated for 15 amperes.", example_th: "ฟิวส์มีพิกัด 15 แอมแปร์" },
+                { word: "Ohm", pronunciation: "/əʊm/", translation: "โอห์ม", example: "Resistance is measured in ohms.", example_th: "ความต้านทานวัดเป็นโอห์ม" },
+                { word: "Wire", pronunciation: "/waɪər/", translation: "สายไฟ", example: "Be careful not to touch the exposed wire.", example_th: "ระวังอย่าสัมผัสสายไฟที่ไม่มีฉนวนหุ้ม" },
+                { word: "Cable", pronunciation: "/ˈkeɪ.bəl/", translation: "สายเคเบิล", example: "An underground cable provides power to the building.", example_th: "สายเคเบิลใต้ดินจ่ายไฟให้กับอาคาร" },
+                { word: "Terminal", pronunciation: "/ˈtɜː.mɪ.nəl/", translation: "ขั้วต่อ", example: "Connect the wire to the positive terminal.", example_th: "ต่อสายไฟเข้ากับขั้วบวก" },
+                { word: "Power Grid", pronunciation: "/ˈpaʊə ɡrɪd/", translation: "โครงข่ายไฟฟ้า", example: "A major storm can damage the power grid.", example_th: "พายุใหญ่สามารถสร้างความเสียหายให้กับโครงข่ายไฟฟ้าได้" },
+                { word: "Substation", pronunciation: "/ˈsʌbˌsteɪ.ʃən/", translation: "สถานีไฟฟ้าย่อย", example: "The substation steps down the voltage for distribution.", example_th: "สถานีไฟฟ้าย่อยลดระดับแรงดันไฟฟ้าเพื่อการจ่ายไฟ" },
+                { word: "Short Circuit", pronunciation: "/ˌʃɔːt ˈsɜː.kɪt/", translation: "ไฟฟ้าลัดวงจร", example: "A short circuit can cause a fire.", example_th: "ไฟฟ้าลัดวงจรสามารถทำให้เกิดไฟไหม้ได้" },
+                { "word": "Capacitance", "pronunciation": "/kəˈpæs.ɪ.təns/", "translation": "ค่าความจุไฟฟ้า", "example": "Capacitance is measured in farads.", "example_th": "ค่าความจุไฟฟ้ามีหน่วยวัดเป็นฟารัด" },
+                { "word": "Inductance", "pronunciation": "/ɪnˈdʌk.təns/", "translation": "ค่าความเหนี่ยวนำ", "example": "A coil of wire has inductance.", "example_th": "ขดลวดมีค่าความเหนี่ยวนำ" },
+                { "word": "Frequency", "pronunciation": "/ˈfriː.kwən.si/", "translation": "ความถี่", "example": "The frequency of AC power in Thailand is 50 hertz.", "example_th": "ความถี่ของไฟฟ้ากระแสสลับในประเทศไทยคือ 50 เฮิรตซ์" },
+                { "word": "Phase", "pronunciation": "/feɪz/", "translation": "เฟส", "example": "This motor requires a three-phase power supply.", "example_th": "มอเตอร์นี้ต้องการแหล่งจ่ายไฟสามเฟส" },
+                { "word": "Multimeter", "pronunciation": "/ˈmʌl.tiˌmiː.tər/", "translation": "มัลติมิเตอร์", "example": "Use a multimeter to check the voltage.", "example_th": "ใช้มัลติมิเตอร์เพื่อตรวจสอบแรงดันไฟฟ้า" }
+            ]
+        },
+        electronics: {
+            name: "แผนกวิชาอิเล็กทรอนิกส์",
+            description: "เรียนรู้คำศัพท์เกี่ยวกับชิ้นส่วนอิเล็กทรอนิกส์, วงจร, การบัดกรี และเครื่องมือวัดที่ใช้ในงานซ่อมและสร้างอุปกรณ์อิเล็กทรอนิกส์",
+            words: [
+                { word: "Resistor", pronunciation: "/rɪˈzɪs.tər/", translation: "ตัวต้านทาน", example: "This resistor has a value of 10k ohms.", example_th: "ตัวต้านทานนี้มีค่า 10k โอห์ม" },
+                { word: "Capacitor", pronunciation: "/kəˈpæs.ɪ.tər/", translation: "ตัวเก็บประจุ", example: "The capacitor stores electrical energy.", example_th: "ตัวเก็บประจุใช้สำหรับเก็บพลังงานไฟฟ้า" },
+                { word: "Transistor", pronunciation: "/trænˈzɪs.tər/", translation: "ทรานซิสเตอร์", example: "A transistor can act as a switch or an amplifier.", example_th: "ทรานซิสเตอร์สามารถทำงานเป็นสวิตช์หรือตัวขยายสัญญาณได้" },
+                { word: "Diode", pronunciation: "/ˈdaɪ.oʊd/", translation: "ไดโอด", example: "A diode allows current to flow in one direction.", example_th: "ไดโอดอนุญาตให้กระแสไฟฟ้าไหลผ่านได้ในทิศทางเดียว" },
+                { word: "Integrated Circuit", pronunciation: "/ˈɪn.tɪ.ɡreɪ.tɪd ˈsɜː.kɪt/", translation: "วงจรรวม (ไอซี)", example: "This is a complex integrated circuit.", example_th: "นี่คือวงจรรวมที่ซับซ้อน" },
+                { word: "PCB (Printed Circuit Board)", pronunciation: "/ˌpiː.siːˈbiː/", translation: "แผ่นวงจรพิมพ์", example: "All components are soldered onto the PCB.", example_th: "ชิ้นส่วนทั้งหมดถูกบัดกรีลงบนแผ่นวงจรพิมพ์" },
+                { word: "Soldering", pronunciation: "/ˈsəʊl.dər.ɪŋ/", translation: "การบัดกรี", example: "Good soldering requires a steady hand.", example_th: "การบัดกรีที่ดีต้องใช่มือที่นิ่ง" },
+                { word: "Oscilloscope", pronunciation: "/əˈsɪl.ə.skəʊp/", translation: "ออสซิลโลสโคป", example: "An oscilloscope is used to view signal waveforms.", example_th: "ออสซิลโลสโคปใช้เพื่อดูรูปคลื่นสัญญาณ" },
+                { word: "Multimeter", pronunciation: "/ˈmʌl.tiˌmiː.tər/", translation: "มัลติมิเตอร์", example: "I used a multimeter to test the battery.", example_th: "ฉันใช้มัลติมิเตอร์เพื่อทดสอบแบตเตอรี่" },
+                { word: "Semiconductor", pronunciation: "/ˌsem.i.kənˈdʌk.tər/", translation: "สารกึ่งตัวนำ", example: "Silicon is a common semiconductor material.", example_th: "ซิลิคอนเป็นวัสดุสารกึ่งตัวนำที่ใช้กันทั่วไป" },
+                { word: "CPU (Central Processing Unit)", pronunciation: "/ˌsiː.piːˈjuː/", translation: "หน่วยประมวลผลกลาง", example: "The CPU is the brain of the computer.", example_th: "ซีพียูคือสมองของคอมพิวเตอร์" },
+                { word: "RAM (Random Access Memory)", pronunciation: "/ræm/", translation: "แรม", example: "Adding more RAM can make your computer faster.", example_th: "การเพิ่มแรมสามารถทำให้คอมพิวเตอร์ของคุณเร็วขึ้นได้" },
+                { word: "Motherboard", pronunciation: "/ˈmʌð.ə.bɔːd/", translation: "เมนบอร์ด", example: "The motherboard connects all the computer's components.", example_th: "เมนบอร์ดเชื่อมต่อส่วนประกอบทั้งหมดของคอมพิวเตอร์" },
+                { word: "Power Supply", pronunciation: "/ˈpaʊə səˌplaɪ/", translation: "แหล่งจ่ายไฟ", example: "You need a powerful power supply for this graphics card.", example_th: "คุณต้องใช้แหล่งจ่ายไฟที่ทรงพลังสำหรับกราฟิกการ์ดนี้" },
+                { word: "Signal", pronunciation: "/ˈsɪɡ.nəl/", translation: "สัญญาณ", example: "The antenna receives a weak signal.", example_th: "เสาอากาศรับสัญญาณที่อ่อน" },
+                { word: "Amplifier", pronunciation: "/ˈæm.plɪ.faɪ.ər/", translation: "เครื่องขยายเสียง", example: "An amplifier increases the strength of a signal.", example_th: "เครื่องขยายเสียงเพิ่มความแรงของสัญญาณ" },
+                { word: "Microcontroller", pronunciation: "/ˌmaɪ.krəʊ.kənˈtrəʊ.lər/", translation: "ไมโครคอนโทรลเลอร์", example: "An Arduino is a popular microcontroller board.", example_th: "Arduino เป็นบอร์ดไมโครคอนโทรลเลอร์ที่นิยม" },
+                { word: "Sensor", pronunciation: "/ˈsen.sər/", translation: "เซ็นเซอร์", example: "The temperature sensor detected a change.", example_th: "เซ็นเซอร์อุณหภูมิตรวจพบการเปลี่ยนแปลง" },
+                { word: "Actuator", pronunciation: "/ˈæk.tʃu.eɪ.tər/", translation: "แอคชูเอเตอร์", example: "An actuator converts a signal into physical movement.", example_th: "แอคชูเอเตอร์แปลงสัญญาณเป็นการเคลื่อนไหวทางกายภาพ" },
+                { word: "Firmware", pronunciation: "/ˈfɜːm.weər/", translation: "เฟิร์มแวร์", example: "You need to update the device's firmware.", example_th: "คุณต้องอัปเดตเฟิร์มแวร์ของอุปกรณ์" },
+                { "word": "Inductor", "pronunciation": "/ɪnˈdʌk.tər/", "translation": "ตัวเหนี่ยวนำ", "example": "An inductor stores energy in a magnetic field.", "example_th": "ตัวเหนี่ยวนำเก็บพลังงานในสนามแม่เหล็ก" },
+                { "word": "Logic Gate", "pronunciation": "/ˈlɒdʒ.ɪk ɡeɪt/", "translation": "ลอจิกเกต", "example": "AND, OR, and NOT are basic logic gates.", "example_th": "AND, OR และ NOT เป็นลอจิกเกตพื้นฐาน" },
+                { "word": "Breadboard", "pronunciation": "/ˈbred.bɔːd/", "translation": "แผงวงจรทดลอง", "example": "We use a breadboard to prototype circuits without soldering.", "example_th": "เราใช้แผงวงจรทดลองเพื่อสร้างวงจรต้นแบบโดยไม่ต้องบัดกรี" },
+                { "word": "Schematic", "pronunciation": "/skiˈmæt.ɪk/", "translation": "แผนผังวงจร", "example": "The schematic shows how all the components are connected.", "example_th": "แผนผังวงจรแสดงว่าส่วนประกอบทั้งหมดเชื่อมต่อกันอย่างไร" },
+                { "word": "Voltage Regulator", "pronunciation": "/ˈvoʊl.tɪdʒ ˈreɡ.jə.leɪ.tər/", "translation": "ตัวควบคุมแรงดันไฟฟ้า", "example": "A voltage regulator provides a constant output voltage.", "example_th": "ตัวควบคุมแรงดันไฟฟ้าให้แรงดันเอาต์พุตที่คงที่" },
+                { "word": "Heat Sink", "pronunciation": "/hiːt sɪŋk/", "translation": "แผ่นระบายความร้อน", "example": "The CPU needs a heat sink to prevent overheating.", "example_th": "ซีพียูต้องการแผ่นระบายความร้อนเพื่อป้องกันความร้อนสูงเกินไป" },
+                { "word": "Analog", "pronunciation": "/ˈæn.ə.lɒɡ/", "translation": "แอนะล็อก", "example": "A vinyl record is an analog audio source.", "example_th": "แผ่นเสียงไวนิลเป็นแหล่งเสียงแบบแอนะล็อก" },
+                { "word": "Digital", "pronunciation": "/ˈdɪdʒ.ɪ.təl/", "translation": "ดิจิทัล", "example": "Digital signals are represented by ones and zeros.", "example_th": "สัญญาณดิจิทัลจะแสดงด้วยเลขหนึ่งและศูนย์" },
+                { "word": "Waveform", "pronunciation": "/ˈweɪv.fɔːm/", "translation": "รูปคลื่น", "example": "The oscilloscope displays the waveform of the signal.", "example_th": "ออสซิลโลสโคปแสดงรูปคลื่นของสัญญาณ" },
+                { "word": "Prototype", "pronunciation": "/ˈprəʊ.tə.taɪp/", "translation": "ต้นแบบ", "example": "This is the first prototype of our new device.", "example_th": "นี่คือต้นแบบแรกของอุปกรณ์ใหม่ของเรา" }
+            ]
+        },
+        accounting: {
+            name: "แผนกวิชาการบัญชี",
+            description: "เรียนรู้คำศัพท์พื้นฐานทางบัญชี เช่น สินทรัพย์, หนี้สิน, งบการเงิน และหลักการลงบัญชีที่จำเป็นสำหรับนักบัญชี",
+            words: [
+                { word: "Asset", pronunciation: "/ˈæs.et/", translation: "สินทรัพย์", example: "The company's assets include buildings and cash.", example_th: "สินทรัพย์ของบริษัทประกอบด้วยอาคารและเงินสด" },
+                { word: "Liability", pronunciation: "/ˌlaɪ.əˈbɪl.ə.ti/", translation: "หนี้สิน", example: "A loan is a type of liability.", example_th: "เงินกู้คือหนี้สินประเภทหนึ่ง" },
+                { word: "Equity", pronunciation: "/ˈek.wɪ.ti/", translation: "ส่วนของผู้ถือหุ้น", example: "Equity is assets minus liabilities.", example_th: "ส่วนของผู้ถือหุ้นคือสินทรัพย์ลบด้วยหนี้สิน" },
+                { word: "Debit", pronunciation: "/ˈdeb.ɪt/", translation: "เดบิต", example: "In accounting, debit is an entry on the left side of an account.", example_th: "ในทางบัญชี เดบิตคือการบันทึกรายการทางด้านซ้ายของบัญชี" },
+                { word: "Credit", pronunciation: "/ˈkred.ɪt/", translation: "เครดิต", example: "Credit is an entry on the right side of an account.", example_th: "เครดิตคือการบันทึกรายการทางด้านขวาของบัญชี" },
+                { word: "Invoice", pronunciation: "/ˈɪn.vɔɪs/", translation: "ใบแจ้งหนี้", example: "We will send you an invoice for the services.", example_th: "เราจะส่งใบแจ้งหนี้สำหรับค่าบริการไปให้คุณ" },
+                { word: "Balance Sheet", pronunciation: "/ˈbæl.əns ʃiːt/", translation: "งบดุล", example: "The balance sheet shows the company's financial position.", example_th: "งบดุลแสดงฐานะทางการเงินของบริษัท" },
+                { word: "Income Statement", pronunciation: "/ˈɪŋ.kʌm ˈsteɪt.mənt/", translation: "งบกำไรขาดทุน", example: "The income statement reports a company's financial performance.", example_th: "งบกำไรขาดทุนรายงานผลการดำเนินงานทางการเงินของบริษัท" },
+                { word: "Cash Flow", pronunciation: "/kæʃ fləʊ/", translation: "กระแสเงินสด", example: "Positive cash flow is important for a business.", example_th: "กระแสเงินสดที่เป็นบวกมีความสำคัญต่อธุรกิจ" },
+                { word: "Audit", pronunciation: "/ˈɔː.dɪt/", translation: "การตรวจสอบบัญชี", example: "The company undergoes an annual audit.", example_th: "บริษัทมีการตรวจสอบบัญชีประจำปี" },
+                { word: "Ledger", pronunciation: "/ˈledʒ.ər/", translation: "สมุดบัญชีแยกประเภท", example: "All transactions are recorded in the general ledger.", example_th: "ธุรกรรมทั้งหมดจะถูกบันทึกในสมุดบัญชีแยกประเภททั่วไป" },
+                { word: "Depreciation", pronunciation: "/dɪˌpriː.ʃiˈeɪ.ʃən/", translation: "ค่าเสื่อมราคา", example: "Depreciation is the decrease in the value of an asset over time.", example_th: "ค่าเสื่อมราคาคือการลดลงของมูลค่าสินทรัพย์เมื่อเวลาผ่านไป" },
+                { word: "Revenue", pronunciation: "/ˈrev.ən.juː/", translation: "รายได้", example: "The company's revenue has increased this year.", example_th: "รายได้ของบริษัทเพิ่มขึ้นในปีนี้" },
+                { word: "Expense", pronunciation: "/ɪkˈspens/", translation: "ค่าใช้จ่าย", example: "We need to reduce our operating expenses.", example_th: "เราต้องลดค่าใช้จ่ายในการดำเนินงานของเรา" },
+                { word: "Profit", pronunciation: "/ˈprɒf.ɪt/", translation: "กำไร", example: "Profit is the difference between revenue and expenses.", example_th: "กำไรคือส่วนต่างระหว่างรายได้และค่าใช้จ่าย" },
+                { word: "Loss", pronunciation: "/lɒs/", translation: "ขาดทุน", example: "The company reported a loss for the third quarter.", example_th: "บริษัทรายงานผลขาดทุนสำหรับไตรมาสที่สาม" },
+                { word: "Accounts Payable", pronunciation: "/əˌkaʊnts ˈpeɪ.ə.bəl/", translation: "บัญชีเจ้าหนี้", example: "Accounts payable is money owed by a company to its creditors.", example_th: "บัญชีเจ้าหนี้คือเงินที่บริษัทเป็นหนี้เจ้าหนี้" },
+                { word: "Accounts Receivable", pronunciation: "/əˌkaʊnts rɪˈsiː.və.bəl/", translation: "บัญชีลูกหนี้", example: "Accounts receivable is money owed to a company by its customers.", example_th: "บัญชีลูกหนี้คือเงินที่ลูกค้าเป็นหนี้บริษัท" },
+                { word: "Budget", pronunciation: "/ˈbʌdʒ.ɪt/", translation: "งบประมาณ", example: "We need to stick to the project budget.", example_th: "เราต้องยึดตามงบประมาณของโครงการ" },
+                { word: "Tax", pronunciation: "/tæks/", translation: "ภาษี", example: "It's time to file your income tax return.", example_th: "ถึงเวลาต้องยื่นแบบแสดงรายการภาษีเงินได้แล้ว" },
+                { "word": "Journal", "pronunciation": "/ˈdʒɜː.nəl/", "translation": "สมุดรายวัน", "example": "Transactions are first recorded in a journal.", "example_th": "ธุรกรรมจะถูกบันทึกในสมุดรายวันก่อน" },
+                { "word": "Trial Balance", "pronunciation": "/ˈtraɪ.əl ˈbæl.əns/", "translation": "งบทดลอง", "example": "A trial balance checks if debits equal credits.", "example_th": "งบทดลองตรวจสอบว่าเดบิตเท่ากับเครดิตหรือไม่" },
+                { "word": "Fiscal Year", "pronunciation": "/ˈfɪs.kəl jɪər/", "translation": "ปีงบประมาณ", "example": "Our fiscal year ends on December 31st.", "example_th": "ปีงบประมาณของเราสิ้นสุดในวันที่ 31 ธันวาคม" },
+                { "word": "Payroll", "pronunciation": "/ˈpeɪ.rəʊl/", "translation": "บัญชีเงินเดือน", "example": "The payroll department processes employee salaries.", "example_th": "แผนกบัญชีเงินเดือนดำเนินการเกี่ยวกับเงินเดือนของพนักงาน" },
+                { "word": "Inventory", "pronunciation": "/ˈɪn.vən.tɔːr.i/", "translation": "สินค้าคงคลัง", "example": "We need to do an inventory count at the end of the month.", "example_th": "เราต้องนับสินค้าคงคลังตอนสิ้นเดือน" },
+                { "word": "Capital", "pronunciation": "/ˈkæp.ɪ.təl/", "translation": "เงินทุน", "example": "The business needs more capital to expand.", "example_th": "ธุรกิจต้องการเงินทุนเพิ่มเพื่อขยายกิจการ" },
+                { "word": "Financial Statement", "pronunciation": "/faɪˈnæn.ʃəl ˈsteɪt.mənt/", "translation": "งบการเงิน", "example": "Financial statements provide an overview of a company's health.", "example_th": "งบการเงินให้ภาพรวมเกี่ยวกับสถานะของบริษัท" },
+                { "word": "Accrual", "pronunciation": "/əˈkruː.əl/", "translation": "การบัญชีแบบเกณฑ์คงค้าง", "example": "Accrual accounting records revenue when it's earned.", "example_th": "การบัญชีแบบเกณฑ์คงค้างบันทึกรายได้เมื่อเกิดขึ้นจริง" },
+                { "word": "Goodwill", "pronunciation": "/ˈɡʊd.wɪl/", "translation": "ค่าความนิยม", "example": "Goodwill is an intangible asset.", "example_th": "ค่าความนิยมเป็นสินทรัพย์ที่ไม่มีตัวตน" },
+                { "word": "Overhead", "pronunciation": "/ˈəʊ.və.hed/", "translation": "ค่าใช้จ่ายในการดำเนินงาน", "example": "Rent and utilities are part of the business overhead.", "example_th": "ค่าเช่าและค่าสาธารณูปโภคเป็นส่วนหนึ่งของค่าใช้จ่ายในการดำเนินงานของธุรกิจ" }
+            ]
+        },
+        digital: {
+            name: "แผนกวิชาเทคโนโลยีธุรกิจดิจิทัล",
+            description: "เรียนรู้คำศัพท์เกี่ยวกับคอมพิวเตอร์, ซอฟต์แวร์, เครือข่าย, และเทคโนโลยีที่จำเป็นในการทำธุรกิจในยุคดิจิทัล",
+            words: [
+                { word: "Software", pronunciation: "/ˈsɒft.weər/", translation: "ซอฟต์แวร์", example: "You need to install the new software.", example_th: "คุณต้องติดตั้งซอฟต์แวร์ใหม่" },
+                { word: "Hardware", pronunciation: "/ˈhɑːd.weər/", translation: "ฮาร์ดแวร์", example: "The computer hardware needs an upgrade.", example_th: "ฮาร์ดแวร์ของคอมพิวเตอร์จำเป็นต้องได้รับการอัพเกรด" },
+                { word: "Database", pronunciation: "/ˈdeɪ.tə.beɪs/", translation: "ฐานข้อมูล", example: "All customer information is stored in a database.", example_th: "ข้อมูลลูกค้าทั้งหมดถูกเก็บไว้ในฐานข้อมูล" },
+                { word: "Network", pronunciation: "/ˈnet.wɜːk/", translation: "เครือข่าย", example: "The office network is down.", example_th: "เครือข่ายของออฟฟิศล่ม" },
+                { word: "Algorithm", pronunciation: "/ˈæl.ɡə.rɪ.ðəm/", translation: "อัลกอริทึม", example: "Search engines use a complex algorithm.", example_th: "เครื่องมือค้นหาใช้อัลกอริทึมที่ซับซ้อน" },
+                { word: "Cloud Computing", pronunciation: "/klaʊd kəmˈpjuː.tɪŋ/", translation: "คลาวด์คอมพิวติ้ง", example: "We moved our data to the cloud computing service.", example_th: "เราย้ายข้อมูลของเราไปยังบริการคลาวด์คอมพิวติ้ง" },
+                { word: "Cybersecurity", pronunciation: "/ˌsaɪ.bə.sɪˈkjʊə.rə.ti/", translation: "ความปลอดภัยทางไซเบอร์", example: "Cybersecurity is essential to protect against hackers.", example_th: "ความปลอดภัยทางไซเบอร์เป็นสิ่งจำเป็นเพื่อป้องกันแฮกเกอร์" },
+                { word: "UI (User Interface)", pronunciation: "/ˌjuːˈaɪ/", translation: "ส่วนต่อประสานกับผู้ใช้", example: "A good UI should be intuitive and easy to use.", example_th: "UI ที่ดีควรจะใช้งานง่ายและเข้าใจได้ทันที" },
+                { word: "UX (User Experience)", pronunciation: "/ˌjuːˈeks/", translation: "ประสบการณ์ผู้ใช้", example: "We are focused on improving the overall user experience.", example_th: "เรามุ่งเน้นไปที่การปรับปรุงประสบการณ์ผู้ใช้โดยรวม" },
+                { word: "Front-end", pronunciation: "/ˌfrʌntˈend/", translation: "ส่วนหน้าบ้าน", example: "Front-end development deals with what the user sees.", example_th: "การพัฒนาส่วนหน้าบ้านเกี่ยวข้องกับสิ่งที่ผู้ใช้มองเห็น" },
+                { word: "Back-end", pronunciation: "/ˌbækˈend/", translation: "ส่วนหลังบ้าน", example: "The back-end consists of the server, application, and database.", example_th: "ส่วนหลังบ้านประกอบด้วยเซิร์ฟเวอร์ แอปพลิเคชัน และฐานข้อมูล" },
+                { word: "API (Application Programming Interface)", pronunciation: "/ˌeɪ.piːˈaɪ/", translation: "เอพีไอ", example: "We use an API to get weather data.", example_th: "เราใช้ API เพื่อรับข้อมูลสภาพอากาศ" },
+                { word: "Deployment", pronunciation: "/dɪˈplɔɪ.mənt/", translation: "การนำไปใช้งาน", example: "The new software deployment is scheduled for midnight.", example_th: "การนำซอฟต์แวร์ใหม่ไปใช้งานมีกำหนดการตอนเที่ยงคืน" },
+                { word: "Server", pronunciation: "/ˈsɜː.vər/", translation: "เซิร์ฟเวอร์", example: "The website is hosted on a remote server.", example_th: "เว็บไซต์ถูกโฮสต์บนเซิร์ฟเวอร์ระยะไกล" },
+                { word: "Client", pronunciation: "/ˈklaɪ.ənt/", translation: "ไคลเอนต์", example: "The client sends a request to the server.", example_th: "ไคลเอนต์ส่งคำขอไปยังเซิร์ฟเวอร์" },
+                { word: "Data Analytics", pronunciation: "/ˈdeɪ.tə ˌæn.əˈlɪt.ɪks/", translation: "การวิเคราะห์ข้อมูล", example: "Data analytics helps us understand customer behavior.", example_th: "การวิเคราะห์ข้อมูลช่วยให้เราเข้าใจพฤติกรรมของลูกค้า" },
+                { word: "Machine Learning", pronunciation: "/məˌʃiːn ˈlɜː.nɪŋ/", translation: "การเรียนรู้ของเครื่อง", example: "Machine learning is a type of artificial intelligence.", example_th: "การเรียนรู้ของเครื่องเป็นปัญญาประดิษฐ์ประเภทหนึ่ง" },
+                { word: "E-commerce", pronunciation: "/ˈiːˌkɒm.ɜːs/", translation: "อีคอมเมิร์ซ", example: "Our e-commerce site sells products globally.", example_th: "เว็บไซต์อีคอมเมิร์ซของเราขายสินค้าทั่วโลก" },
+                { word: "Digital Marketing", pronunciation: "/ˈdɪdʒ.ɪ.təl ˈmɑː.kɪ.tɪŋ/", translation: "การตลาดดิจิทัล", example: "SEO is a key part of digital marketing.", example_th: "SEO เป็นส่วนสำคัญของการตลาดดิจิทัล" },
+                { word: "Content Management System (CMS)", pronunciation: "/ˌsiː.emˈes/", translation: "ระบบจัดการเนื้อหา", example: "WordPress is a popular Content Management System.", example_th: "WordPress เป็นระบบจัดการเนื้อหาที่นิยม" },
+                { "word": "Framework", "pronunciation": "/ˈfreɪm.wɜːk/", "translation": "เฟรมเวิร์ก", "example": "React is a popular JavaScript framework for building user interfaces.", "example_th": "React เป็นเฟรมเวิร์ก JavaScript ที่นิยมสำหรับการสร้างส่วนต่อประสานกับผู้ใช้" },
+                { "word": "Domain Name", "pronunciation": "/dəˈmeɪn neɪm/", "translation": "ชื่อโดเมน", "example": "You need to register a domain name for your website.", "example_th": "คุณต้องจดทะเบียนชื่อโดเมนสำหรับเว็บไซต์ของคุณ" },
+                { "word": "Hosting", "pronunciation": "/ˈhəʊ.stɪŋ/", "translation": "โฮสติ้ง", "example": "We need reliable hosting for our e-commerce site.", "example_th": "เราต้องการโฮสติ้งที่เชื่อถือได้สำหรับเว็บไซต์อีคอมเมิร์ซของเรา" },
+                { "word": "Encryption", "pronunciation": "/ɪnˈkrɪp.ʃən/", "translation": "การเข้ารหัส", "example": "Encryption protects sensitive data from being read.", "example_th": "การเข้ารหัสช่วยป้องกันข้อมูลที่ละเอียดอ่อนจากการถูกอ่าน" },
+                { "word": "Firewall", "pronunciation": "/ˈfaɪə.wɔːl/", "translation": "ไฟร์วอลล์", "example": "A firewall helps to block unauthorized access to a network.", "example_th": "ไฟร์วอลล์ช่วยป้องกันการเข้าถึงเครือข่ายโดยไม่ได้รับอนุญาต" },
+                { "word": "Bandwidth", "pronunciation": "/ˈbænd.wɪtθ/", "translation": "แบนด์วิดท์", "example": "Streaming high-quality video requires a lot of bandwidth.", "example_th": "การสตรีมวิดีโอคุณภาพสูงต้องใช้แบนด์วิดท์จำนวนมาก" },
+                { "word": "Cache", "pronunciation": "/kæʃ/", "translation": "แคช", "example": "Clearing your browser cache can solve some website issues.", "example_th": "การล้างแคชของเบราว์เซอร์สามารถแก้ปัญหาบางอย่างของเว็บไซต์ได้" },
+                { "word": "Cookie", "pronunciation": "/ˈkʊk.i/", "translation": "คุกกี้", "example": "Websites use cookies to remember user preferences.", "example_th": "เว็บไซต์ใช้คุกกี้เพื่อจดจำการตั้งค่าของผู้ใช้" },
+                { "word": "Responsive Design", "pronunciation": "/rɪˈspɒn.sɪv dɪˈzaɪn/", "translation": "การออกแบบที่ปรับเปลี่ยนตามอุปกรณ์", "example": "Responsive design ensures a website looks good on all devices.", "example_th": "การออกแบบที่ปรับเปลี่ยนตามอุปกรณ์ช่วยให้แน่ใจว่าเว็บไซต์ดูดีบนทุกอุปกรณ์" },
+                { "word": "Version Control", "pronunciation": "/ˈvɜː.ʒən kənˌtrəʊl/", "translation": "การควบคุมเวอร์ชัน", "example": "Git is a popular version control system.", "example_th": "Git เป็นระบบควบคุมเวอร์ชันที่นิยม" }
+            ]
+        },
+        home: {
+            name: "แผนกวิชาคหกรรม",
+            description: "เรียนรู้คำศัพท์เกี่ยวกับอาหาร, โภชนาการ, การทำอาหาร, การตัดเย็บ และการจัดการงานบ้าน เพื่อความเป็นมืออาชีพในสายงานคหกรรม",
+            words: [
+                { word: "Ingredient", pronunciation: "/ɪnˈɡriː.di.ənt/", translation: "ส่วนผสม", example: "Please list all the ingredients for this recipe.", example_th: "โปรดระบุส่วนผสมทั้งหมดสำหรับสูตรอาหารนี้" },
+                { word: "Recipe", pronunciation: "/ˈres.ɪ.pi/", translation: "สูตรอาหาร", example: "I got this recipe from my grandmother.", example_th: "ฉันได้สูตรอาหารนี้มาจากคุณย่าของฉัน" },
+                { word: "Sewing", pronunciation: "/ˈsoʊ.ɪŋ/", translation: "การเย็บผ้า", example: "Sewing is a useful skill.", example_th: "การเย็บผ้าเป็นทักษะที่มีประโยชน์" },
+                { word: "Nutrition", pronunciation: "/njuːˈtrɪʃ.ən/", translation: "โภชนาการ", example: "Good nutrition is important for health.", example_th: "โภชนาการที่ดีมีความสำคัญต่อสุขภาพ" },
+                { word: "Fabric", pronunciation: "/ˈfæb.rɪk/", translation: "ผ้า", example: "She chose a beautiful fabric for her dress.", example_th: "เธอเลือกผ้าที่สวยงามสำหรับชุดของเธอ" },
+                { word: "Whisk", pronunciation: "/wɪsk/", translation: "ตะกร้อตีไข่", example: "Use a whisk to beat the eggs.", example_th: "ใช้ตะกร้อตีไข่เพื่อตีไข่" },
+                { word: "Spatula", pronunciation: "/ˈspætʃ.ə.lə/", translation: "ไม้พาย", example: "Scrape the bowl with a spatula.", example_th: "ใช้ไม้พายปาดอ่างผสม" },
+                { word: "Knead", pronunciation: "/niːd/", translation: "นวดแป้ง", example: "You need to knead the dough for 10 minutes.", example_th: "คุณต้องนวดแป้งเป็นเวลา 10 นาที" },
+                { word: "Sauté", pronunciation: "/ˈsəʊ.teɪ/", translation: "ผัด", example: "Sauté the onions until they are soft.", example_th: "ผัดหัวหอมจนนิ่ม" },
+                { word: "Blanch", pronunciation: "/blɑːntʃ/", translation: "ลวก", example: "Blanch the vegetables in boiling water.", example_th: "ลวกผักในน้ำเดือด" },
+                { word: "Pattern", pronunciation: "/ˈpæt.ən/", translation: "แพทเทิร์น", example: "Follow the sewing pattern carefully.", example_th: "ทำตามแพทเทิร์นการตัดเย็บอย่างระมัดระวัง" },
+                { word: "Seam", pronunciation: "/siːm/", translation: "ตะเข็บ", example: "The seam on my shirt is coming apart.", example_th: "ตะเข็บบนเสื้อของฉันกำลังจะหลุด" },
+                { word: "Embroidery", pronunciation: "/ɪmˈbrɔɪ.dər.i/", translation: "การปักผ้า", example: "Embroidery can add a beautiful detail to clothing.", example_th: "การปักผ้าสามารถเพิ่มรายละเอียดที่สวยงามให้กับเสื้อผ้าได้" },
+                { word: "Budget", pronunciation: "/ˈbʌdʒ.ɪt/", translation: "งบประมาณ", example: "We need to plan our weekly food budget.", example_th: "เราต้องวางแผนงบประมาณค่าอาหารรายสัปดาห์" },
+                { word: "Hygiene", pronunciation: "/ˈhaɪ.dʒiːn/", translation: "สุขอนามัย", example: "Food hygiene is very important in the kitchen.", example_th: "สุขอนามัยด้านอาหารมีความสำคัญมากในห้องครัว" },
+                { word: "Appliance", pronunciation: "/əˈplaɪ.əns/", translation: "เครื่องใช้ไฟฟ้า", example: "A microwave is a common kitchen appliance.", example_th: "ไมโครเวฟเป็นเครื่องใช้ไฟฟ้าในครัวที่ใช้กันทั่วไป" },
+                { word: "Utensil", pronunciation: "/juːˈten.səl/", translation: "เครื่องใช้ในครัว", example: "Forks, knives, and spoons are utensils.", example_th: "ส้อม มีด และช้อน เป็นเครื่องใช้ในครัว" },
+                { word: "Bake", pronunciation: "/beɪk/", translation: "อบ", example: "I am going to bake a cake for your birthday.", example_th: "ฉันจะอบเค้กสำหรับวันเกิดของคุณ" },
+                { word: "Roast", pronunciation: "/rəʊst/", translation: "ย่าง", example: "We are having roast chicken for dinner.", example_th: "เราจะกินไก่ย่างเป็นอาหารเย็น" },
+                { word: "Grill", pronunciation: "/ɡrɪl/", translation: "ปิ้ง", example: "Let's grill some burgers on the barbecue.", example_th: "มาปิ้งเบอร์เกอร์บนเตาบาร์บีคิวกันเถอะ" },
+                { "word": "Simmer", "pronunciation": "/ˈsɪm.ər/", "translation": "เคี่ยว", "example": "Let the soup simmer for at least an hour.", "example_th": "ปล่อยให้ซุปเคี่ยวอย่างน้อยหนึ่งชั่วโมง" },
+                { "word": "Marinate", "pronunciation": "/ˈmær.ɪ.neɪt/", "translation": "หมัก", "example": "Marinate the chicken overnight for the best flavor.", "example_th": "หมักไก่ข้ามคืนเพื่อให้ได้รสชาติที่ดีที่สุด" },
+                { "word": "Garnish", "pronunciation": "/ˈɡɑː.nɪʃ/", "translation": "ตกแต่งอาหาร", "example": "Garnish the dish with fresh parsley before serving.", "example_th": "ตกแต่งจานด้วยพาร์สลีย์สดก่อนเสิร์ฟ" },
+                { "word": "Dough", "pronunciation": "/dəʊ/", "translation": "แป้งโดว์", "example": "The pizza dough needs to rise for an hour.", "example_th": "แป้งพิซซ่าต้องพักให้ขึ้นฟูเป็นเวลาหนึ่งชั่วโมง" },
+                { "word": "Yeast", "pronunciation": "/jiːst/", "translation": "ยีสต์", "example": "Yeast makes bread rise.", "example_th": "ยีสต์ทำให้ขนมปังขึ้นฟู" },
+                { "word": "Thread", "pronunciation": "/θred/", "translation": "ด้าย", "example": "I need a needle and thread to fix this button.", "example_th": "ฉันต้องการเข็มและด้ายเพื่อซ่อมกระดุมเม็ดนี้" },
+                { "word": "Stitch", "pronunciation": "/stɪtʃ/", "translation": "ฝีเข็ม", "example": "She used a running stitch to hem the skirt.", "example_th": "เธอใช้การด้นถอยหลังเพื่อสอยชายกระโปรง" },
+                { "word": "Textile", "pronunciation": "/ˈteks.taɪl/", "translation": "สิ่งทอ", "example": "The textile industry is a major part of the economy.", "example_th": "อุตสาหกรรมสิ่งทอเป็นส่วนสำคัญของเศรษฐกิจ" },
+                { "word": "Preservation", "pronunciation": "/ˌprez.əˈveɪ.ʃən/", "translation": "การถนอมอาหาร", "example": "Canning is a method of food preservation.", "example_th": "การบรรจุกระป๋องเป็นวิธีการถนอมอาหารอย่างหนึ่ง" },
+                { "word": "Etiquette", "pronunciation": "/ˈet.ɪ.ket/", "translation": "มารยาท", "example": "Table etiquette is important when dining with others.", "example_th": "มารยาทบนโต๊ะอาหารเป็นสิ่งสำคัญเมื่อรับประทานอาหารร่วมกับผู้อื่น" }
+            ]
+        },
+        general: {
+            name: "แผนกวิชาสามัญสัมพันธ์",
+            description: "เรียนรู้คำศัพท์ทั่วไปที่จำเป็นสำหรับการสื่อสารในที่ทำงาน, การทำงานร่วมกับผู้อื่น, และการพัฒนาตนเองในสายอาชีพ",
+            words: [
+                { word: "Communication", pronunciation: "/kəˌmjuː.nɪˈkeɪ.ʃən/", translation: "การสื่อสาร", example: "Good communication is key to teamwork.", example_th: "การสื่อสารที่ดีเป็นกุญแจสำคัญของการทำงานเป็นทีม" },
+                { word: "Teamwork", pronunciation: "/ˈtiːm.wɜːk/", translation: "การทำงานเป็นทีม", example: "This project requires a lot of teamwork.", example_th: "โครงการนี้ต้องการการทำงานเป็นทีมอย่างมาก" },
+                { word: "Responsibility", pronunciation: "/rɪˌspɒn.sɪˈbɪl.ə.ti/", translation: "ความรับผิดชอบ", example: "It's your responsibility to finish this task.", example_th: "มันเป็นความรับผิดชอบของคุณที่จะทำงานนี้ให้เสร็จ" },
+                { word: "Professional", pronunciation: "/prəˈfeʃ.ən.əl/", translation: "ความเป็นมืออาชีพ", example: "Please maintain a professional attitude at work.", example_th: "โปรดรักษาทัศนคติที่เป็นมืออาชีพในที่ทำงาน" },
+                { word: "Schedule", pronunciation: "/ˈʃedʒ.uːl/", translation: "ตารางเวลา/กำหนดการ", example: "Let's check the schedule for our next meeting.", example_th: "มาดูกำหนดการสำหรับการประชุมครั้งต่อไปกันเถอะ" },
+                { word: "Deadline", pronunciation: "/ˈded.laɪn/", translation: "กำหนดส่งงาน", example: "The deadline for this report is Friday.", example_th: "กำหนดส่งรายงานนี้คือวันศุกร์" },
+                { word: "Meeting", pronunciation: "/ˈmiː.tɪŋ/", translation: "การประชุม", example: "We have a team meeting every Monday morning.", example_th: "เรามีการประชุมทีมทุกเช้าวันจันทร์" },
+                { word: "Presentation", pronunciation: "/ˌprez.ənˈteɪ.ʃən/", translation: "การนำเสนอ", example: "She gave an excellent presentation.", example_th: "เธอนำเสนอผลงานได้อย่างยอดเยี่ยม" },
+                { word: "Feedback", pronunciation: "/ˈfiːd.bæk/", translation: "ข้อเสนอแนะ", example: "Constructive feedback helps us improve.", example_th: "ข้อเสนอแนะที่สร้างสรรค์ช่วยให้เราปรับปรุงได้" },
+                { word: "Collaboration", pronunciation: "/kəˌlæb.əˈreɪ.ʃən/", translation: "การทำงานร่วมกัน", example: "Collaboration between departments is essential.", example_th: "การทำงานร่วมกันระหว่างแผนกเป็นสิ่งจำเป็น" },
+                { word: "Objective", pronunciation: "/əbˈdʒek.tɪv/", translation: "วัตถุประสงค์", example: "Our main objective is to increase sales.", example_th: "วัตถุประสงค์หลักของเราคือการเพิ่มยอดขาย" },
+                { word: "Strategy", pronunciation: "/ˈstræt.ə.dʒi/", translation: "กลยุทธ์", example: "We need a new marketing strategy.", example_th: "เราต้องการกลยุทธ์การตลาดใหม่" },
+                { word: "Report", pronunciation: "/rɪˈpɔːt/", translation: "รายงาน", example: "Please submit your weekly report by 5 PM.", example_th: "กรุณาส่งรายงานประจำสัปดาห์ของคุณภายในเวลา 17:00 น." },
+                { word: "Analysis", pronunciation: "/əˈnæl.ə.sɪs/", translation: "การวิเคราะห์", example: "The data analysis revealed a new trend.", example_th: "การวิเคราะห์ข้อมูลเผยให้เห็นแนวโน้มใหม่" },
+                { word: "Skill", pronunciation: "/skɪl/", translation: "ทักษะ", example: "Problem-solving is a valuable skill.", example_th: "การแก้ปัญหาเป็นทักษะที่มีค่า" },
+                { word: "Task", pronunciation: "/tɑːsk/", translation: "งาน", example: "My first task of the day is to check emails.", example_th: "งานแรกของวันของฉันคือการตรวจสอบอีเมล" },
+                { word: "Project", pronunciation: "/ˈprɒdʒ.ekt/", translation: "โครงการ", example: "He is the manager of this new project.", example_th: "เขาเป็นผู้จัดการของโครงการใหม่นี้" },
+                { word: "Goal", pronunciation: "/ɡəʊl/", translation: "เป้าหมาย", example: "Set realistic goals for yourself.", example_th: "ตั้งเป้าหมายที่เป็นจริงสำหรับตัวคุณเอง" },
+                { word: "Customer", pronunciation: "/ˈkʌs.tə.mər/", translation: "ลูกค้า", example: "Customer satisfaction is our top priority.", example_th: "ความพึงพอใจของลูกค้าคือสิ่งที่เราให้ความสำคัญสูงสุด" },
+                { word: "Problem-solving", pronunciation: "/ˈprɒb.ləm ˌsɒl.vɪŋ/", translation: "การแก้ปัญหา", example: "She has excellent problem-solving skills.", example_th: "เธอมีทักษะในการแก้ปัญหาที่ยอดเยี่ยม" },
+                { "word": "Negotiation", "pronunciation": "/nəˌɡəʊ.ʃiˈeɪ.ʃən/", "translation": "การเจรจาต่อรอง", "example": "Negotiation skills are important in business.", "example_th": "ทักษะการเจรจาต่อรองมีความสำคัญในธุรกิจ" },
+                { "word": "Leadership", "pronunciation": "/ˈliː.də.ʃɪp/", "translation": "ภาวะผู้นำ", "example": "The company needs strong leadership.", "example_th": "บริษัทต้องการภาวะผู้นำที่เข้มแข็ง" },
+                { "word": "Innovation", "pronunciation": "/ˌɪn.əˈveɪ.ʃən/", "translation": "นวัตกรรม", "example": "We encourage innovation and creativity.", "example_th": "เราส่งเสริมนวัตกรรมและความคิดสร้างสรรค์" },
+                { "word": "Efficiency", "pronunciation": "/ɪˈfɪʃ.ən.si/", "translation": "ประสิทธิภาพ", "example": "New technology has improved our efficiency.", "example_th": "เทคโนโลยีใหม่ได้ปรับปรุงประสิทธิภาพของเรา" },
+                { "word": "Policy", "pronunciation": "/ˈpɒl.ə.si/", "translation": "นโยบาย", "example": "You should read the company's safety policy.", "example_th": "คุณควรอ่านนโยบายความปลอดภัยของบริษัท" },
+                { "word": "Procedure", "pronunciation": "/prəˈsiː.dʒər/", "translation": "ขั้นตอน", "example": "Please follow the standard operating procedure.", "example_th": "กรุณาปฏิบัติตามขั้นตอนการปฏิบัติงานมาตรฐาน" },
+                { "word": "Memo", "pronunciation": "/ˈmem.əʊ/", "translation": "บันทึกข้อความ", "example": "The manager sent a memo to all staff.", "example_th": "ผู้จัดการส่งบันทึกข้อความถึงพนักงานทุกคน" },
+                { "word": "Agenda", "pronunciation": "/əˈdʒen.də/", "translation": "วาระการประชุม", "example": "What is the first item on the agenda?", "example_th": "รายการแรกในวาระการประชุมคืออะไร?" },
+                { "word": "Minutes", "pronunciation": "/ˈmɪn.ɪts/", "translation": "รายงานการประชุม", "example": "She is responsible for taking the minutes.", "example_th": "เธอมีหน้าที่จดรายงานการประชุม" },
+                { "word": "Networking", "pronunciation": "/ˈnet.wɜː.kɪŋ/", "translation": "การสร้างเครือข่าย", "example": "Conferences are a good opportunity for networking.", "example_th": "การประชุมเป็นโอกาสที่ดีสำหรับการสร้างเครือข่าย" }
+            ]
+        },
+    };
+
+    const departmentColors = {
+        automotive: 'yellow',
+        machining: 'blue',
+        welding: 'red',
+        electrical: 'purple',
+        electronics: 'green',
+        accounting: 'indigo',
+        digital: 'pink',
+        home: 'amber',
+        general: 'teal',
+    };
+
+    // --- STATE ---
+    let state = {
+        currentPage: 'homePage',
+        previousPage: 'homePage',
+        currentDepartment: null,
+        currentWordIndex: 0,
+        totalTimeSeconds: 0,
+        timerInterval: null,
+        userProgress: {}
+    };
+
+    // --- DOM ELEMENTS ---
+    const pages = {
+        home: document.getElementById('homePage'),
+        department: document.getElementById('departmentPage'),
+        learning: document.getElementById('learningPage'),
+        completion: document.getElementById('completionPage'),
+        stats: document.getElementById('statsPage'),
+    };
+    
+    // Header
+    const headerTitle = document.getElementById('headerTitle');
+
+    // Home Page
+    const departmentGrid = document.getElementById('departmentGrid');
+    
+    // Global
+    const totalTimeEl = document.getElementById('totalTime');
+
+    // Department Page
+    const backToHomeBtn = document.getElementById('backToHome');
+    const departmentTitleEl = document.getElementById('departmentTitle');
+    const departmentDescriptionEl = document.getElementById('departmentDescription');
+    const startLearningBtn = document.getElementById('startLearning');
+    const progressCircle = document.getElementById('progressCircle');
+    const progressPercent = document.getElementById('progressPercent');
+    const learnedWords = document.getElementById('learnedWords');
+    const learnedWordsBar = document.getElementById('learnedWordsBar');
+    const selectFlashcards = document.getElementById('selectFlashcards');
+    
+    // Learning Page
+    const backToDepartmentBtn = document.getElementById('backToDepartment');
+    const currentCardIndexEl = document.getElementById('currentCardIndex');
+    const totalCardsEl = document.getElementById('totalCards');
+    const vocabCard = document.getElementById('vocabCard');
+    const vocabWordEl = document.getElementById('vocabWord');
+    const vocabPronunciationEl = document.getElementById('vocabPronunciation');
+    const playPronunciationBtn = document.getElementById('playPronunciation');
+    const vocabTranslationEl = document.getElementById('vocabTranslation');
+    const vocabExampleEl = document.getElementById('vocabExample');
+    const vocabExampleTranslationEl = document.getElementById('vocabExampleTranslation');
+    const prevCardBtn = document.getElementById('prevCard');
+    const nextCardBtn = document.getElementById('nextCard');
+    const markAsLearnedBtn = document.getElementById('markAsLearned');
+
+    // Completion Page
+    const completionMessage = document.getElementById('completionMessage');
+    const restartSetBtn = document.getElementById('restartSet');
+    const backToHomeFromCompletionBtn = document.getElementById('backToHomeFromCompletion');
+
+    // Statistics Page
+    const statsButton = document.getElementById('statsButton');
+    const backFromStatsBtn = document.getElementById('backFromStats');
+    const totalLearnedStat = document.getElementById('totalLearnedStat');
+    const totalWordsStat = document.getElementById('totalWordsStat');
+    const totalLearnedWordsBar = document.getElementById('totalLearnedWordsBar');
+    const totalLearnedPercent = document.getElementById('totalLearnedPercent');
+    const totalTimeSpentStat = document.getElementById('totalTimeSpentStat');
+    const statsChartCanvas = document.getElementById('statsChart').getContext('2d');
+    let statsChart = null;
+
+    // --- FUNCTIONS ---
+
+    function saveState() {
+        localStorage.setItem('niceEnglishAppState', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const savedState = localStorage.getItem('niceEnglishAppState');
+        if (savedState) {
+            state = JSON.parse(savedState);
+            state.currentPage = 'homePage'; // Always start at home
+            state.timerInterval = null; // Ensure timer is not running on load
+        }
+        Object.keys(vocabData).forEach(deptKey => {
+            if (!state.userProgress[deptKey]) {
+                state.userProgress[deptKey] = { learned: [] };
+            }
+        });
+    }
+
+    function showPage(pageId) {
+        state.previousPage = state.currentPage;
+        state.currentPage = pageId;
+        Object.values(pages).forEach(page => page.classList.remove('active'));
+        pages[pageId.replace('Page', '')].classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function startTimer() {
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.timerInterval = setInterval(() => {
+            state.totalTimeSeconds++;
+            const minutes = Math.floor(state.totalTimeSeconds / 60) % 60;
+            const seconds = state.totalTimeSeconds % 60;
+            totalTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            saveState();
+        }, 1000);
+    }
+
+    function renderHomePage() {
+        departmentGrid.innerHTML = '';
+        Object.keys(vocabData).forEach(key => {
+            const dept = vocabData[key];
+            const color = departmentColors[key] || 'gray';
+            const progress = state.userProgress[key];
+            const totalWords = dept.words.length;
+            const learnedCount = progress.learned.length;
+            const percent = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
+
+            const card = document.createElement('div');
+            card.className = `department-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer flex flex-col`;
+            card.dataset.dept = key;
+            card.innerHTML = `
+                <div class="bg-${color}-500 h-2"></div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-xl font-semibold text-gray-800">${dept.name}</h3>
+                    <p class="text-gray-600 text-sm mt-2 flex-grow">${dept.description.substring(0, 90)}...</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>ความก้าวหน้า (${totalWords} คำ)</span>
+                            <span>${percent}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-${color}-500 h-1.5 rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            card.addEventListener('click', () => selectDepartment(key));
+            departmentGrid.appendChild(card);
+        });
+        showPage('homePage');
+    }
+    
+    function selectDepartment(deptKey) {
+        state.currentDepartment = deptKey;
+        const dept = vocabData[deptKey];
+        departmentTitleEl.textContent = dept.name;
+        departmentDescriptionEl.textContent = dept.description;
+        updateDepartmentProgress();
+        showPage('departmentPage');
+    }
+    
+    function updateDepartmentProgress() {
+        const deptKey = state.currentDepartment;
+        if (!deptKey) return;
+        const progress = state.userProgress[deptKey];
+        const totalWords = vocabData[deptKey].words.length;
+        const learnedCount = progress.learned.length;
+        const percent = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
+        
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (percent / 100) * circumference;
+
+        progressCircle.style.strokeDashoffset = offset;
+        progressPercent.textContent = `${percent}%`;
+        learnedWords.textContent = `${learnedCount}/${totalWords}`;
+        learnedWordsBar.style.width = `${percent}%`;
+    }
+
+    function startLearning() {
+        const deptKey = state.currentDepartment;
+        if (!deptKey) return;
+        state.currentWordIndex = 0;
+        showPage('learningPage');
+        displayCard(state.currentWordIndex);
+    }
+
+    function displayCard(index) {
+        const deptKey = state.currentDepartment;
+        const words = vocabData[deptKey].words;
+        const wordData = words[index];
+        const progress = state.userProgress[deptKey];
+
+        vocabCard.classList.remove('flipped');
+        
+        vocabWordEl.textContent = wordData.word;
+        vocabPronunciationEl.textContent = wordData.pronunciation;
+        vocabTranslationEl.textContent = wordData.translation;
+        vocabExampleEl.textContent = wordData.example;
+        vocabExampleTranslationEl.textContent = wordData.example_th;
+        
+        currentCardIndexEl.textContent = index + 1;
+        totalCardsEl.textContent = words.length;
+        
+        prevCardBtn.disabled = index === 0;
+        nextCardBtn.disabled = index === words.length - 1;
+
+        if (progress.learned.includes(index)) {
+             markAsLearnedBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+             markAsLearnedBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+             markAsLearnedBtn.disabled = true;
+             markAsLearnedBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>เรียนแล้ว`;
+        } else {
+            markAsLearnedBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            markAsLearnedBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            markAsLearnedBtn.disabled = false;
+            markAsLearnedBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>ฉันจำได้แล้ว`;
+        }
+    }
+    
+    function showStatsPage() {
+        let totalLearnedCount = 0;
+        let totalWordCount = 0;
+        const deptLabels = [];
+        const deptLearnedData = [];
+        const deptColors = [];
+
+        Object.keys(vocabData).forEach(key => {
+            const dept = vocabData[key];
+            const progress = state.userProgress[key];
+            totalWordCount += dept.words.length;
+            totalLearnedCount += progress.learned.length;
+            
+            deptLabels.push(dept.name);
+            deptLearnedData.push(progress.learned.length);
+            deptColors.push(`rgba(${hexToRgb(getTailwindColor(departmentColors[key]))}, 0.6)`);
+        });
+        
+        const totalPercent = totalWordCount > 0 ? Math.round((totalLearnedCount / totalWordCount) * 100) : 0;
+
+        totalLearnedStat.textContent = totalLearnedCount;
+        totalWordsStat.textContent = totalWordCount;
+        totalLearnedWordsBar.style.width = `${totalPercent}%`;
+        totalLearnedWordsBar.textContent = `${totalPercent}%`;
+        totalLearnedPercent.textContent = totalPercent;
+        
+        const h = Math.floor(state.totalTimeSeconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((state.totalTimeSeconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (state.totalTimeSeconds % 60).toString().padStart(2, '0');
+        totalTimeSpentStat.textContent = `${h}:${m}:${s}`;
+        
+        if (statsChart) {
+            statsChart.destroy();
+        }
+
+        statsChart = new Chart(statsChartCanvas, {
+            type: 'bar',
+            data: {
+                labels: deptLabels,
+                datasets: [{
+                    label: 'จำนวนคำศัพท์ที่เรียนรู้แล้ว',
+                    data: deptLearnedData,
+                    backgroundColor: deptColors,
+                    borderColor: deptColors.map(c => c.replace('0.6', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    const total = vocabData[Object.keys(vocabData)[context.dataIndex]].words.length;
+                                    label += context.parsed.x + ' / ' + total + ' คำ';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                         ticks: {
+                            stepSize: 5
+                        }
+                    }
+                }
+            }
+        });
+        
+        showPage('statsPage');
+    }
+    
+    function getTailwindColor(colorName) {
+        const colors = {
+            yellow: '#f59e0b', blue: '#3b82f6', red: '#ef4444', purple: '#8b5cf6',
+            green: '#22c55e', indigo: '#6366f1', pink: '#ec4899', amber: '#f59e0b', teal: '#14b8a6'
+        };
+        return colors[colorName] || '#6b7280';
+    }
+    
+    function hexToRgb(hex) {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+    }
+
+    function playPronunciation() {
+        const text = vocabWordEl.textContent;
+        if ('speechSynthesis' in window && text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert('ขออภัย เบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง');
+        }
+    }
+
+    function markAsLearned() {
+        const deptKey = state.currentDepartment;
+        const index = state.currentWordIndex;
+        const progress = state.userProgress[deptKey];
+        const totalWords = vocabData[deptKey].words.length;
+
+        if (!progress.learned.includes(index)) {
+            progress.learned.push(index);
+        }
+        
+        saveState();
+
+        if (progress.learned.length === totalWords) {
+            completionMessage.textContent = `คุณได้เรียนรู้คำศัพท์จากแผนกวิชา "${vocabData[deptKey].name}" ครบ ${totalWords} คำแล้ว`;
+            showPage('completionPage');
+        } else {
+            if(state.currentWordIndex < totalWords - 1) {
+                state.currentWordIndex++;
+            }
+            displayCard(state.currentWordIndex);
+        }
+    }
+
+    // --- EVENT LISTENERS ---
+    headerTitle.addEventListener('click', () => renderHomePage());
+    backToHomeBtn.addEventListener('click', () => renderHomePage());
+    startLearningBtn.addEventListener('click', startLearning);
+    selectFlashcards.addEventListener('click', startLearning);
+    
+    backToDepartmentBtn.addEventListener('click', () => {
+        selectDepartment(state.currentDepartment);
+    });
+    
+    vocabCard.addEventListener('click', () => vocabCard.classList.toggle('flipped'));
+    playPronunciationBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playPronunciation();
+    });
+    
+    prevCardBtn.addEventListener('click', () => {
+        if (state.currentWordIndex > 0) {
+            state.currentWordIndex--;
+            displayCard(state.currentWordIndex);
+        }
+    });
+
+    nextCardBtn.addEventListener('click', () => {
+        const words = vocabData[state.currentDepartment].words;
+        if (state.currentWordIndex < words.length - 1) {
+            state.currentWordIndex++;
+            displayCard(state.currentWordIndex);
+        }
+    });
+
+    markAsLearnedBtn.addEventListener('click', markAsLearned);
+
+    restartSetBtn.addEventListener('click', () => {
+        const deptKey = state.currentDepartment;
+        if(deptKey) {
+            state.userProgress[deptKey].learned = [];
+            saveState();
+            startLearning();
+        }
+    });
+    backToHomeFromCompletionBtn.addEventListener('click', renderHomePage);
+    
+    statsButton.addEventListener('click', showStatsPage);
+    backFromStatsBtn.addEventListener('click', () => {
+        if (state.previousPage === 'departmentPage') {
+            selectDepartment(state.currentDepartment);
+        } else {
+            renderHomePage();
+        }
+    });
+
+    // --- INITIALIZATION ---
+    loadState();
+    renderHomePage();
+    startTimer();
+});
+
+</script>
+</body>
+</html>
