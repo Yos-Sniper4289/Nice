@@ -14,9 +14,7 @@
             font-family: 'Sarabun', sans-serif;
             background-color: #f7fafc;
         }
-        .rating-input {
-            display: none;
-        }
+        .rating-input { display: none; }
         .rating-label {
             display: flex;
             align-items: center;
@@ -31,19 +29,14 @@
             font-size: 1.125rem;
             color: #4a5568;
         }
-        .rating-label:hover {
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
+        .rating-label:hover { border-color: #3b82f6; color: #3b82f6; }
         .rating-input:checked + .rating-label {
             background-color: #3b82f6;
             border-color: #3b82f6;
             color: white;
             transform: scale(1.1);
         }
-        .progress-bar-inner {
-            transition: width 0.3s ease-in-out;
-        }
+        .progress-bar-inner { transition: width 0.3s ease-in-out; }
         .loader {
             border: 5px solid #f3f3f3;
             border-top: 5px solid #3b82f6;
@@ -63,7 +56,7 @@
     <!-- Main Menu View -->
     <div id="main-menu-view" class="container mx-auto max-w-xl p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-screen">
         <div class="text-center w-full">
-            <div class="bg-white p-8 sm:p-12 rounded-2xl shadow-xl">
+            <div id="main-menu-content" class="bg-white p-8 sm:p-12 rounded-2xl shadow-xl">
                  <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 mb-6">
                     <svg class="h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -72,10 +65,10 @@
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800">วิทยาลัยการอาชีพนครนายก</h1>
                 <p class="text-lg text-gray-600 mt-2 mb-10">ระบบประเมินโครงการอบรมเชิงปฏิบัติการอาชีวศึกษาในการเป็นผู้ประกอบการ</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button id="go-to-form-btn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <button id="go-to-form-btn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         เริ่มทำแบบประเมิน
                     </button>
-                    <button id="go-to-summary-btn" class="w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-300 transition-transform transform hover:scale-105 shadow-lg">
+                    <button id="go-to-summary-btn" class="w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-300 transition-transform transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         ดูสรุปผล
                     </button>
                 </div>
@@ -155,30 +148,31 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- GLOBAL APP STATE & CONFIGURATION ---
         let db, auth, userId, currentSummaryData = null;
 
-// --- Firebase Configuration ---
-// วาง config ที่คัดลอกมาจาก Firebase ของคุณที่นี่
-const firebaseConfig = {
-  apiKey: "AIzaSyDPo9cSOmvFqcl3XAHyXkYQhpQPFq-hkgQ",
-  authDomain: "nice-22145.firebaseapp.com",
-  databaseURL: "https://nice-22145-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "nice-22145",
-  storageBucket: "nice-22145.firebasestorage.app",
-  messagingSenderId: "399529001549",
-  appId: "1:399529001549:web:e963765f12544c64bc1204",
-  measurementId: "G-1VG1HGB6GY"
-};
+        // This configuration is provided by the user.
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPo9cSOmvFqcl3XAHyXkYQhpQPFq-hkgQ",
+            authDomain: "nice-22145.firebaseapp.com",
+            databaseURL: "https://nice-22145-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nice-22145",
+            storageBucket: "nice-22145.appspot.com",
+            messagingSenderId: "399529001549",
+            appId: "1:399529001549:web:e963765f12544c64bc1204",
+            measurementId: "G-1VG1HGB6GY"
+        };
+        const staticAppId = 'entrepreneur-survey-2025';
 
-
-        // --- UI Elements ---
+        // --- UI ELEMENTS ---
         const mainMenuView = document.getElementById('main-menu-view');
+        const mainMenuContent = document.getElementById('main-menu-content');
         const formView = document.getElementById('form-view');
         const summaryView = document.getElementById('summary-view');
         const views = { mainMenuView, formView, summaryView };
         
-        document.getElementById('go-to-form-btn').addEventListener('click', () => showView('formView'));
-        document.getElementById('go-to-summary-btn').addEventListener('click', () => { showView('summaryView'); fetchAndDisplaySummary(); });
+        const goToFormBtn = document.getElementById('go-to-form-btn');
+        const goToSummaryBtn = document.getElementById('go-to-summary-btn');
         document.querySelectorAll('.back-to-main-btn').forEach(btn => btn.addEventListener('click', () => showView('mainMenuView')));
         document.getElementById('export-xlsx-btn').addEventListener('click', exportToXlsx);
         
@@ -204,21 +198,14 @@ const firebaseConfig = {
         const summaryRatingsTableBody = document.getElementById('summary-ratings-table');
         const suggestionsListEl = document.getElementById('suggestions-list');
 
-        // --- Survey Data Structure ---
+        // --- SURVEY DATA STRUCTURE ---
         const surveyDataStructure = [
             { 
                 title: 'ตอนที่ 1: สถานภาพทั่วไป', type: 'userInfo', fields: [
                     { id: 'gender', label: '1. เพศ', type: 'radio', options: [{label: 'ชาย', value: 'male'}, {label: 'หญิง', value: 'female'}] },
                     { id: 'status', label: '2. สถานภาพ', type: 'radio', options: [{label: 'นักเรียน/นักศึกษา', value: 'student'}, {label: 'ครูที่ปรึกษาธุรกิจ', value: 'advisor'}] },
-                    { id: 'education', label: '3. ระดับการศึกษา', type: 'radio', options: [
-                        {label: 'ปวช.', value: 'voc_cert'}, {label: 'ปวส.', value: 'high_voc_cert'}, 
-                        {label: 'ปริญญาตรี', value: 'bachelor'}, {label: 'สูงกว่าปริญญาตรี', value: 'postgraduate'} 
-                    ]},
-                    { id: 'department', label: '4. แผนกวิชา', type: 'select', options: [
-                        {label: 'เลือกแผนกวิชา', value: ''}, {label: 'ช่างยนต์', value: 'automotive'}, {label: 'ช่างกลโรงงาน', value: 'mechanic'},
-                        {label: 'ช่างเชื่อมโลหะ', value: 'welding'}, {label: 'ช่างไฟฟ้ากำลัง', value: 'electrical'}, {label: 'ช่างอิเล็กทรอนิกส์', value: 'electronics'},
-                        {label: 'การบัญชี', value: 'accounting'}, {label: 'คหกรรมศาสตร์', value: 'home_economics'}, {label: 'เทคโนโลยีธุรกิจดิจิทัล', value: 'digital_business_tech'}
-                    ]}
+                    { id: 'education', label: '3. ระดับการศึกษา', type: 'radio', options: [ {label: 'ปวช.', value: 'voc_cert'}, {label: 'ปวส.', value: 'high_voc_cert'}, {label: 'ปริญญาตรี', value: 'bachelor'}, {label: 'สูงกว่าปริญญาตรี', value: 'postgraduate'} ]},
+                    { id: 'department', label: '4. แผนกวิชา', type: 'select', options: [ {label: 'เลือกแผนกวิชา', value: ''}, {label: 'ช่างยนต์', value: 'automotive'}, {label: 'ช่างกลโรงงาน', value: 'mechanic'}, {label: 'ช่างเชื่อมโลหะ', value: 'welding'}, {label: 'ช่างไฟฟ้ากำลัง', value: 'electrical'}, {label: 'ช่างอิเล็กทรอนิกส์', value: 'electronics'}, {label: 'การบัญชี', value: 'accounting'}, {label: 'คหกรรมศาสตร์', value: 'home_economics'}, {label: 'เทคโนโลยีธุรกิจดิจิทัล', value: 'digital_business_tech'} ]}
                 ]
             },
             { 
@@ -239,8 +226,7 @@ const firebaseConfig = {
         const educationLabels = { voc_cert: 'ปวช.', high_voc_cert: 'ปวส.', bachelor: 'ปริญญาตรี', postgraduate: 'สูงกว่าปริญญาตรี'};
         const departmentLabels = { automotive: 'ช่างยนต์', mechanic: 'ช่างกลโรงงาน', welding: 'ช่างเชื่อมโลหะ', electrical: 'ช่างไฟฟ้ากำลัง', electronics: 'ช่างอิเล็กทรอนิกส์', accounting: 'การบัญชี', home_economics: 'คหกรรมศาสตร์', digital_business_tech: 'เทคโนโลยีธุรกิจดิจิทัล' };
 
-        // --- Core Functions ---
-
+        // --- CORE FUNCTIONS ---
         function showView(viewId) { for (const id in views) { views[id].classList.toggle('hidden', id !== viewId); } window.scrollTo(0, 0); }
 
         function populateFormQuestions() {
@@ -253,7 +239,7 @@ const firebaseConfig = {
                     section.fields.forEach(f => {
                          contentHtml += `<div><label class="block text-gray-700 font-bold mb-3">${f.label}</label>`;
                         if (f.type === 'radio') {
-                            contentHtml += `<div class="flex flex-col space-y-2">`; f.options.forEach(opt => contentHtml += `<label class="flex items-center text-lg"><input type="radio" name="${f.id}" value="${opt.value}" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" required><span class="ml-2">${opt.label}</span></label>`); contentHtml += `</div>`;
+                            contentHtml += `<div class="flex flex-col space-y-2">`; f.options.forEach(opt => contentHtml += `<label class="flex items-center text-lg"><input type="radio" name="${f.id}" value="${opt.value}" class="h-4 w-4 text-blue-600 border-gray-300" required><span class="ml-2">${opt.label}</span></label>`); contentHtml += `</div>`;
                         } else if (f.type === 'select') {
                             contentHtml += `<select name="${f.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 text-lg" required>`; f.options.forEach(opt => contentHtml += `<option value="${opt.value}" ${opt.value === '' ? 'disabled selected' : ''}>${opt.label}</option>`); contentHtml += `</select>`;
                         }
@@ -285,12 +271,29 @@ const firebaseConfig = {
         
         async function initializeFirebase() {
             try {
-                if (!firebaseConfig.apiKey) { alert('เกิดข้อผิดพลาดในการตั้งค่าระบบ'); return; }
-                const app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app);
+                if (!firebaseConfig || !firebaseConfig.apiKey) { throw new Error('Firebase configuration is missing.'); }
+                const app = initializeApp(firebaseConfig); 
+                db = getFirestore(app); 
+                auth = getAuth(app);
                 setLogLevel('debug');
-                onAuthStateChanged(auth, user => { userId = user ? user.uid : null; });
+                onAuthStateChanged(auth, user => {
+                    if (user) {
+                        userId = user.uid;
+                        goToFormBtn.disabled = false;
+                        goToSummaryBtn.disabled = false;
+                        goToFormBtn.classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed');
+                        goToSummaryBtn.classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed');
+                    }
+                });
                 if (!auth.currentUser) { await signInAnonymously(auth); }
-            } catch (err) { alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบ'); }
+            } catch (err) {
+                console.error("Firebase Initialization Error:", err);
+                let userFriendlyMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ Firebase: ' + err.message;
+                if (err.code === 'auth/configuration-not-found') {
+                    userFriendlyMessage = 'เกิดข้อผิดพลาดในการตั้งค่า Firebase:\n\nโปรเจกต์ของคุณยังไม่ได้เปิดใช้งาน "การลงชื่อเข้าใช้แบบไม่ระบุตัวตน" (Anonymous)\n\nวิธีแก้ไข:\n1. ไปที่ Firebase Console ของโปรเจกต์คุณ\n2. ไปที่เมนู Authentication -> แท็บ Sign-in method\n3. ค้นหา "Anonymous" ในรายการ แล้วเปิดใช้งาน (Enable)\n4. รีเฟรชหน้านี้ใหม่อีกครั้ง';
+                }
+                mainMenuContent.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p class="font-bold">การเชื่อมต่อล้มเหลว</p><p class="mt-2 whitespace-pre-wrap">${userFriendlyMessage}</p></div>`;
+            }
         }
         
         satisfactionForm.addEventListener('submit', async (e) => {
@@ -322,7 +325,7 @@ const firebaseConfig = {
             } catch (err) { summaryErrorMessage.textContent = err.message; summaryErrorState.classList.remove('hidden'); }
             finally { summaryLoadingState.classList.add('hidden'); }
         }
-        function calculateStats(arr) { const n = arr.length; if (n === 0) return { mean: 0, sd: 0 }; const mean = arr.reduce((a, b) => a + b) / n; const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n; return { mean, sd: Math.sqrt(variance) }; }
+        function calculateStats(arr) { const n = arr.length; if (n === 0) return { mean: 0, sd: 0 }; const mean = arr.reduce((a, b) => a + b, 0) / n; const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n; return { mean, sd: Math.sqrt(variance) }; }
         function getSatisfactionLevel(score) { if (score >= 4.51) return 'มากที่สุด'; if (score >= 3.51) return 'มาก'; if (score >= 2.51) return 'ปานกลาง'; if (score >= 1.51) return 'น้อย'; if (score >= 1.00) return 'น้อยที่สุด'; return 'ไม่มีข้อมูล'; }
         
         function processAndRenderData(responses) {
@@ -374,10 +377,10 @@ const firebaseConfig = {
         }
         
         function renderRespondentSummary(total, gender, status, education, department) {
-            const findTop = (counts, labels) => { let topKey = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, ''); return { name: labels[topKey] || 'N/A', count: counts[topKey] || 0 }; };
+            const findTop = (counts, labels) => { let topKey = total > 0 ? Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, '') : ''; return { name: labels[topKey] || 'N/A', count: counts[topKey] || 0 }; };
             const topEdu = findTop(education, educationLabels);
             const topDept = findTop(department, departmentLabels);
-            let summaryHtml = `<h3 class="text-xl font-bold text-gray-800 mb-4">สรุปข้อมูลผู้ตอบแบบสอบถาม</h3><div class="space-y-3 text-gray-700"><p>มีผู้ตอบแบบสอบถามทั้งสิ้น <strong class="text-gray-900">${total}</strong> คน โดยสามารถสรุปได้ดังนี้:</p><ul class="list-disc list-inside pl-4 space-y-2"><li><strong>เพศ:</strong> ชาย ${gender.male} คน (${(gender.male/total*100).toFixed(1)}%), หญิง ${gender.female} คน (${(gender.female/total*100).toFixed(1)}%).</li><li><strong>สถานภาพ:</strong> นักเรียน/นักศึกษา ${status.student} คน, ครูที่ปรึกษาธุรกิจ ${status.advisor} คน.</li><li><strong>ระดับการศึกษาส่วนใหญ่:</strong> ${topEdu.name}.</li><li><strong>แผนกวิชาส่วนใหญ่:</strong> ${topDept.name}.</li></ul></div>`;
+            let summaryHtml = `<h3 class="text-xl font-bold text-gray-800 mb-4">สรุปข้อมูลผู้ตอบแบบสอบถาม</h3><div class="space-y-3 text-gray-700"><p>มีผู้ตอบแบบสอบถามทั้งสิ้น <strong class="text-gray-900">${total}</strong> คน โดยสามารถสรุปได้ดังนี้:</p><ul class="list-disc list-inside pl-4 space-y-2"><li><strong>เพศ:</strong> ชาย ${gender.male} คน (${(total > 0 ? (gender.male/total*100) : 0).toFixed(1)}%), หญิง ${gender.female} คน (${(total > 0 ? (gender.female/total*100) : 0).toFixed(1)}%).</li><li><strong>สถานภาพ:</strong> นักเรียน/นักศึกษา ${status.student} คน, ครูที่ปรึกษาธุรกิจ ${status.advisor} คน.</li><li><strong>ระดับการศึกษาส่วนใหญ่:</strong> ${topEdu.name}.</li><li><strong>แผนกวิชาส่วนใหญ่:</strong> ${topDept.name}.</li></ul></div>`;
             respondentSummaryContainer.innerHTML = summaryHtml;
         }
 
