@@ -157,19 +157,20 @@
 
         let db, auth, userId, currentSummaryData = null;
 
-        // --- Firebase Configuration ---
-        // This configuration is provided by the user.
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPo9cSOmvFqcl3XAHyXkYQhpQPFq-hkgQ",
-            authDomain: "nice-22145.firebaseapp.com",
-            databaseURL: "https://nice-22145-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "nice-22145",
-            storageBucket: "nice-22145.appspot.com",
-            messagingSenderId: "399529001549",
-            appId: "1:399529001549:web:e963765f12544c64bc1204",
-            measurementId: "G-1VG1HGB6GY"
-        };
-        const staticAppId = 'entrepreneur-survey-2025'; // Use a static ID for the Firestore path
+       // --- Firebase Configuration ---
+// วาง config ที่คัดลอกมาจาก Firebase ของคุณที่นี่
+const firebaseConfig = {
+    apiKey: "AIzaSyDPo9cSOmvFqcl3XAHyXkYQhpQPFq-hkgQ",
+    authDomain: "nice-22145.firebaseapp.com",
+    databaseURL: "https://nice-22145-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "nice-22145",
+    storageBucket: "nice-22145.appspot.com",
+    messagingSenderId: "399529001549",
+    appId: "1:399529001549:web:e963765f12544c64bc1204",
+    measurementId: "G-1VG1HGB6GY"
+};
+const staticAppId = 'entrepreneur-survey-2025'; // Use a static ID for the Firestore path
+
 
         // --- UI Elements ---
         const mainMenuView = document.getElementById('main-menu-view');
