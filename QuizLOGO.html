@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมทายโลโก้</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #111827; /* Gray 900 */
+        }
+
+        .game-card {
+            background-color: #1f2937; /* Gray 800 */
+            border: 1px solid #374151; /* Gray 700 */
+        }
+
+        #logo-container {
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .tile {
+            background-color: #4b5563; /* Gray 600 */
+            transition: opacity 0.4s ease-in-out;
+        }
+        
+        .tile.is-flipped {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .input-guess {
+            background-color: #374151; /* Gray 700 */
+            border: 2px solid #4b5563; /* Gray 600 */
+        }
+        .input-guess:focus {
+            background-color: #4b5563;
+            border-color: #3b82f6; /* Blue 500 */
+            box-shadow: none;
+            outline: none;
+        }
+        .input-guess.correct { border-color: #22c55e; /* Green 500 */ }
+        .input-guess.incorrect { border-color: #ef4444; /* Red 500 */ }
+
+        #progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        .modal-backdrop.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Shake Animation */
+        @keyframes shake {
+            10%, 90% { transform: translateX(-2px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+    </style>
+</head>
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-xl mx-auto">
+        <div id="game-container" class="game-card rounded-2xl p-6 md:p-8 shadow-2xl">
+            
+            <!-- Game Content -->
+            <div id="game-content" class="">
+                <h1 class="text-3xl font-bold text-center text-white mb-2">เกมทายโลโก้</h1>
+                <p class="text-center text-gray-400 mb-6">ทายชื่อแบรนด์ดังระดับโลก</p>
+                
+                <div class="w-full bg-gray-700 rounded-full h-2 mb-5">
+                    <div id="progress-bar-inner" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div class="flex justify-between items-center mb-5 text-sm">
+                    <div class="text-left">
+                        <span class="text-gray-400">คะแนน</span>
+                        <p id="total-score" class="text-lg font-bold text-white">0</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-gray-400">โลโก้ที่</span>
+                        <p id="logo-counter" class="text-lg font-bold text-white">1 / 10</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-400">เปิดป้าย</span>
+                        <p id="flips-count" class="text-lg font-bold text-white">0</p>
+                    </div>
+                </div>
+
+                <div id="logo-container" class="relative w-full aspect-[16/9] mx-auto mb-6 rounded-lg bg-white overflow-hidden">
+                    <div id="tiles-grid" class="grid grid-cols-6 grid-rows-4 h-full"></div>
+                </div>
+
+                <div id="message-area" class="text-center h-6 mb-4 text-yellow-400 font-medium"></div>
+
+                <div id="guess-area" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="guess-input" placeholder="พิมพ์ชื่อแบรนด์..." class="input-guess w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none">
+                    <button id="submit-guess" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg w-full sm:w-auto">ส่งคำตอบ</button>
+                </div>
+
+                <div class="flex justify-center gap-4 mt-4">
+                    <button id="hint-btn" class="btn bg-gray-600 hover:bg-gray-700 text-gray-200 font-medium px-5 py-2 rounded-lg">คำใบ้ (-5 เปิด)</button>
+                    <button id="skip-btn" class="btn bg-gray-600 hover:bg-gray-700 text-gray-200 font-medium px-5 py-2 rounded-lg">ข้าม</button>
+                </div>
+            </div>
+            
+            <!-- Round End Screen -->
+            <div id="round-end-screen" class="hidden text-center">
+                <h2 id="round-end-title" class="text-3xl font-bold text-white mb-3"></h2>
+                <p id="round-end-message" class="text-gray-300 mb-6"></p>
+                <button id="next-logo-btn" class="btn bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-3 rounded-lg text-lg">ข้อต่อไป</button>
+            </div>
+
+            <!-- Final Score Screen -->
+            <div id="final-screen" class="hidden text-center">
+                 <h2 class="text-3xl font-bold text-yellow-400 mb-4">จบเกม!</h2>
+                 <p class="text-xl mb-2 text-gray-300">คะแนนรวมของคุณคือ</p>
+                 <p id="final-score" class="text-6xl font-bold my-6 text-white">0</p>
+                 <button id="restart-game" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 text-lg">เล่นอีกครั้ง</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logos = [
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg', name: 'google', hint: 'เครื่องมือค้นหาที่ใหญ่ที่สุดในโลก' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', name: 'amazon', hint: 'เริ่มต้นจากการขายหนังสือออนไลน์' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg', name: 'facebook', hint: 'โซเชียลเน็ตเวิร์กที่มีผู้ใช้มากที่สุด' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png', name: 'instagram', hint: 'แอปแชร์รูปภาพและวิดีโอสั้น' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg', name: 'youtube', hint: 'แพลตฟอร์มวิดีโอที่ใหญ่ที่สุด' },
+            { src: 'https://upload.wikimedia.org/wikipedia/en/d/d3/Starbucks_Corporation_Logo_2011.svg', name: 'starbucks', hint: 'เชนร้านกาแฟที่ใหญ่ที่สุดในโลก' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg', name: 'nike', hint: 'แบรนด์อุปกรณ์กีฬา สโลแกน "Just Do It"' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg', name: 'apple', hint: 'บริษัทเทคโนโลยีที่มีสัญลักษณ์เป็นผลไม้ที่ถูกกัด' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Coca-Cola_logo.svg', name: 'cocacola', hint: 'เครื่องดื่มน้ำอัดลมสีดำที่เป็นที่รู้จักทั่วโลก' },
+            { src: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg', name: 'microsoft', hint: 'ผู้พัฒนาระบบปฏิบัติการ Windows' }
+        ];
+
+        // --- DOM Elements ---
+        const gameContent = document.getElementById('game-content');
+        const tilesGrid = document.getElementById('tiles-grid');
+        const guessInput = document.getElementById('guess-input');
+        const submitGuessBtn = document.getElementById('submit-guess');
+        const messageArea = document.getElementById('message-area');
+        const totalScoreEl = document.getElementById('total-score');
+        const flipsCountEl = document.getElementById('flips-count');
+        const logoCounterEl = document.getElementById('logo-counter');
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        const hintBtn = document.getElementById('hint-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const roundEndScreen = document.getElementById('round-end-screen');
+        const roundEndTitle = document.getElementById('round-end-title');
+        const roundEndMessage = document.getElementById('round-end-message');
+        const nextLogoBtn = document.getElementById('next-logo-btn');
+        const finalScreen = document.getElementById('final-screen');
+        const finalScoreEl = document.getElementById('final-score');
+        const restartGameBtn = document.getElementById('restart-game');
+
+        // --- Game State ---
+        let currentLogoIndex;
+        let totalScore;
+        let flips;
+        const TOTAL_TILES = 24; // 6x4 grid
+
+        function initGame() {
+            logos.sort(() => Math.random() - 0.5);
+            currentLogoIndex = 0;
+            totalScore = 0;
+            
+            updateScreen('game');
+            loadRound();
+        }
+
+        function loadRound() {
+            if (currentLogoIndex >= logos.length) {
+                showFinalScore();
+                return;
+            }
+            flips = 0;
+            updateUI();
+            createTiles();
+            document.getElementById('logo-container').style.backgroundImage = `url('${logos[currentLogoIndex].src}')`;
+        }
+
+        function createTiles() {
+            tilesGrid.innerHTML = '';
+            for (let i = 0; i < TOTAL_TILES; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.addEventListener('click', () => flipTile(tile));
+                tilesGrid.appendChild(tile);
+            }
+        }
+
+        function flipTile(tile) {
+            if (tile.classList.contains('is-flipped')) return;
+            tile.classList.add('is-flipped');
+            flips++;
+            flipsCountEl.textContent = flips;
+        }
+
+        function checkGuess() {
+            const userGuess = guessInput.value.trim().toLowerCase().replace(/\s/g, '');
+            if (!userGuess) return;
+
+            const correctName = logos[currentLogoIndex].name.toLowerCase().replace(/\s/g, '');
+
+            if (userGuess === correctName) {
+                const points = Math.max(1, TOTAL_TILES - flips + 1) * 10;
+                totalScore += points;
+                endRound(true, points);
+            } else {
+                guessInput.classList.add('incorrect');
+                guessInput.parentElement.classList.add('animate-shake');
+                setTimeout(() => {
+                    guessInput.classList.remove('incorrect');
+                    guessInput.parentElement.classList.remove('animate-shake');
+                }, 400);
+                guessInput.select();
+            }
+        }
+
+        function useHint() {
+            messageArea.textContent = logos[currentLogoIndex].hint;
+            flips += 5;
+            hintBtn.disabled = true;
+            flipsCountEl.textContent = flips;
+        }
+
+        function skipRound() {
+            endRound(false);
+        }
+
+        function endRound(isCorrect, points = 0) {
+            revealAllTiles();
+            updateScreen('roundEnd');
+
+            if (isCorrect) {
+                roundEndTitle.textContent = 'ถูกต้อง!';
+                roundEndTitle.className = 'text-3xl font-bold text-green-400 mb-3';
+                roundEndMessage.textContent = `คุณได้รับ +${points} คะแนน`;
+            } else {
+                roundEndTitle.textContent = 'น่าเสียดาย...';
+                roundEndTitle.className = 'text-3xl font-bold text-yellow-400 mb-3';
+                roundEndMessage.textContent = `คำตอบคือ: ${logos[currentLogoIndex].name.toUpperCase()}`;
+            }
+            
+            if (currentLogoIndex >= logos.length - 1) {
+                nextLogoBtn.textContent = 'ดูผลคะแนน';
+            } else {
+                nextLogoBtn.textContent = 'ข้อต่อไป';
+            }
+        }
+        
+        function nextRound() {
+            currentLogoIndex++;
+            updateScreen('game');
+            loadRound();
+        }
+
+        function revealAllTiles() {
+            document.querySelectorAll('.tile').forEach(tile => tile.classList.add('is-flipped'));
+        }
+
+        function showFinalScore() {
+            finalScoreEl.textContent = totalScore;
+            updateScreen('final');
+        }
+
+        function updateUI() {
+            totalScoreEl.textContent = totalScore;
+            flipsCountEl.textContent = flips;
+            logoCounterEl.textContent = `${currentLogoIndex + 1} / ${logos.length}`;
+            progressBarInner.style.width = `${((currentLogoIndex) / logos.length) * 100}%`;
+            guessInput.value = '';
+            guessInput.classList.remove('incorrect');
+            messageArea.textContent = '';
+            hintBtn.disabled = false;
+        }
+
+        function updateScreen(screen) {
+            gameContent.classList.toggle('hidden', screen !== 'game');
+            roundEndScreen.classList.toggle('hidden', screen !== 'roundEnd');
+            finalScreen.classList.toggle('hidden', screen !== 'final');
+        }
+
+        // --- Event Listeners ---
+        submitGuessBtn.addEventListener('click', checkGuess);
+        guessInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkGuess(); });
+        hintBtn.addEventListener('click', useHint);
+        skipBtn.addEventListener('click', skipRound);
+        nextLogoBtn.addEventListener('click', nextRound);
+        restartGameBtn.addEventListener('click', initGame);
+
+        // --- Start Game ---
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
