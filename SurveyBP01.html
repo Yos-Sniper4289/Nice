@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินความพึงพอใจ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .main-container {
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .rating-input { display: none; }
+        .rating-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #4a5568;
+            background-color: white;
+        }
+        .rating-label:hover { 
+            border-color: #60a5fa; 
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .rating-input:checked + .rating-label {
+            background-image: linear-gradient(to top, #48c6ef 0%, #6f86d6 100%);
+            border-color: #3b82f6;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .progress-bar-inner { transition: width 0.4s ease-in-out; }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .card-shadow {
+             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="main-container">
+
+    <!-- Main Menu View -->
+    <div id="main-menu-view" class="container mx-auto max-w-xl p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-screen">
+        <div class="text-center w-full">
+            <div id="main-menu-content" class="bg-white/90 backdrop-blur-sm p-8 sm:p-12 rounded-2xl card-shadow">
+                 <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 mb-6 border-4 border-white shadow-inner">
+                    <svg class="h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">วิทยาลัยการอาชีพนครนายก</h1>
+                <p class="text-lg text-gray-600 mt-2 mb-10">ระบบประเมินโครงการอบรมเชิงปฏิบัติการอาชีวศึกษาในการเป็นผู้ประกอบการ</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="go-to-form-btn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg">
+                        เริ่มทำแบบประเมิน
+                    </button>
+                    <button id="go-to-summary-btn" class="w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-300 transition-all transform hover:scale-105 shadow-lg">
+                        ดูสรุปผล
+                    </button>
+                </div>
+                <div class="mt-12 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-500">
+                        <a href="http://www.nice-c.ac.th" target="_blank" class="hover:text-blue-600 underline">http://www.nice-c.ac.th</a>
+                        <span class="mx-2">|</span>
+                        <span>Tel : 037 312 568</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Survey Form View -->
+    <div id="form-view" class="hidden">
+        <div class="container mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
+            <div id="survey-form-container">
+                 <div class="bg-white/90 backdrop-blur-sm p-6 sm:p-8 rounded-2xl card-shadow">
+                    <div class="text-center mb-6">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">แบบประเมินโครงการอบรมเชิงปฏิบัติการ</h1>
+                        <p class="text-md md:text-lg text-gray-600 mt-2">อาชีวศึกษาในการเป็นผู้ประกอบการ (การสร้างจิตสำนึก และการเขียนแผนธุรกิจ)</p>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex justify-between mb-1">
+                            <span class="text-base font-medium text-blue-700">ความคืบหน้า</span>
+                            <span id="progress-text" class="text-sm font-medium text-blue-700">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progress-bar-inner" class="bg-blue-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <form id="satisfactionForm">
+                        <div id="form-content"></div>
+                        <div id="form-error-message" class="hidden text-center text-red-500 mt-6 font-bold"></div>
+                        <div class="mt-10 text-center border-t pt-8">
+                            <button id="submit-button" type="submit" class="w-full sm:w-auto inline-flex justify-center items-center py-4 px-10 border border-transparent shadow-lg text-lg font-bold rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-all transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                <span id="submit-button-text">ส่งแบบประเมิน</span>
+                                <div id="submit-loader" class="loader hidden ml-3" style="width:24px; height:24px; border-width: 4px;"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="success-message" class="hidden text-center bg-white p-8 rounded-2xl card-shadow mt-8">
+                <svg class="w-20 h-20 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h2 class="text-3xl font-bold text-gray-800">ส่งข้อมูลสำเร็จ!</h2>
+                <p class="text-gray-600 mt-2 text-lg">ขอขอบคุณสำหรับความคิดเห็นและการมีส่วนร่วมของท่าน</p>
+                 <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="reset-button" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-all transform hover:scale-105">ทำอีกครั้ง</button>
+                    <button class="back-to-main-btn w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-300 transition-all transform hover:scale-105">กลับหน้าหลัก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary View -->
+    <div id="summary-view" class="hidden">
+         <div class="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl md:text-4xl font-bold text-gray-800">สรุปผลแบบประเมินโครงการ</h1>
+                <p class="text-md md:text-lg text-gray-600 mt-2">อบรมเชิงปฏิบัติการอาชีวศึกษาในการเป็นผู้ประกอบการ</p>
+                <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="back-to-main-btn inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-full shadow-md text-white bg-blue-600 hover:bg-blue-700 transition">กลับหน้าหลัก</button>
+                    <button id="export-xlsx-btn" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-full shadow-md text-white bg-green-600 hover:bg-green-700 transition">Export เป็น .xlsx</button>
+                </div>
+            </div>
+            <div id="summary-loading-state" class="text-center py-12"><div class="loader mx-auto"></div><p class="mt-4 text-gray-600">กำลังโหลดข้อมูลสรุป...</p></div>
+            <div id="summary-error-state" class="hidden text-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg"><strong class="font-bold">เกิดข้อผิดพลาด!</strong><span class="block sm:inline" id="summary-error-message"></span></div>
+            <div id="summary-empty-state" class="hidden text-center bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg"><strong class="font-bold">ยังไม่มีข้อมูล</strong><span class="block sm:inline"> ยังไม่มีผู้ตอบแบบประเมิน</span></div>
+            <div id="dashboard-content" class="hidden">
+                <div id="narrative-summary-container" class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl card-shadow mb-8"></div>
+                <div id="respondent-summary-container" class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl card-shadow mb-8"></div>
+                <div class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl card-shadow mb-8"><h3 class="text-xl font-bold text-gray-800 mb-4">ตารางสรุปคะแนนความพึงพอใจ</h3><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">รายการประเมิน</th><th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">ค่าเฉลี่ย</th><th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">S.D.</th><th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">ระดับความพึงพอใจ</th></tr></thead><tbody id="summary-ratings-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                <div class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl card-shadow"><h3 class="text-xl font-bold text-gray-800 mb-4">ข้อเสนอแนะเพิ่มเติม</h3><div id="suggestions-list" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL APP STATE & CONFIGURATION ---
+        let currentSummaryData = null;
+        const surveyId = 'entrepreneur-survey-2025';
+
+        // --- UI ELEMENTS ---
+        const mainMenuView = document.getElementById('main-menu-view');
+        const formView = document.getElementById('form-view');
+        const summaryView = document.getElementById('summary-view');
+        const views = { mainMenuView, formView, summaryView };
+        
+        document.getElementById('go-to-form-btn').addEventListener('click', () => showView('formView'));
+        document.getElementById('go-to-summary-btn').addEventListener('click', () => { showView('summaryView'); fetchAndDisplaySummary(); });
+        document.querySelectorAll('.back-to-main-btn').forEach(btn => btn.addEventListener('click', () => showView('mainMenuView')));
+        document.getElementById('export-xlsx-btn').addEventListener('click', exportToXlsx);
+        
+        const satisfactionForm = document.getElementById('satisfactionForm');
+        const formContent = document.getElementById('form-content');
+        const submitButton = document.getElementById('submit-button');
+        const submitButtonText = document.getElementById('submit-button-text');
+        const submitLoader = document.getElementById('submit-loader');
+        const formErrorMessage = document.getElementById('form-error-message');
+        const surveyFormContainer = document.getElementById('survey-form-container');
+        const successMessage = document.getElementById('success-message');
+        const resetButton = document.getElementById('reset-button');
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        const progressText = document.getElementById('progress-text');
+
+        const summaryLoadingState = document.getElementById('summary-loading-state');
+        const summaryErrorState = document.getElementById('summary-error-state');
+        const summaryErrorMessage = document.getElementById('summary-error-message');
+        const summaryEmptyState = document.getElementById('summary-empty-state');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const narrativeSummaryContainer = document.getElementById('narrative-summary-container');
+        const respondentSummaryContainer = document.getElementById('respondent-summary-container');
+        const summaryRatingsTableBody = document.getElementById('summary-ratings-table');
+        const suggestionsListEl = document.getElementById('suggestions-list');
+
+        // --- SURVEY DATA STRUCTURE ---
+        const surveyDataStructure = [
+            { 
+                title: 'ตอนที่ 1: สถานภาพทั่วไป', type: 'userInfo', fields: [
+                    { id: 'gender', label: '1. เพศ', type: 'radio', options: [{label: 'ชาย', value: 'male'}, {label: 'หญิง', value: 'female'}] },
+                    { id: 'status', label: '2. สถานภาพ', type: 'radio', options: [{label: 'นักเรียน/นักศึกษา', value: 'student'}, {label: 'ครูที่ปรึกษาธุรกิจ', value: 'advisor'}] },
+                    { id: 'education', label: '3. ระดับการศึกษา', type: 'radio', options: [ {label: 'ปวช.', value: 'voc_cert'}, {label: 'ปวส.', value: 'high_voc_cert'}, {label: 'ปริญญาตรี', value: 'bachelor'}, {label: 'สูงกว่าปริญญาตรี', value: 'postgraduate'} ]},
+                    { id: 'department', label: '4. แผนกวิชา', type: 'select', options: [ {label: 'เลือกแผนกวิชา', value: ''}, {label: 'ช่างยนต์', value: 'automotive'}, {label: 'ช่างกลโรงงาน', value: 'mechanic'}, {label: 'ช่างเชื่อมโลหะ', value: 'welding'}, {label: 'ช่างไฟฟ้ากำลัง', value: 'electrical'}, {label: 'ช่างอิเล็กทรอนิกส์', value: 'electronics'}, {label: 'การบัญชี', value: 'accounting'}, {label: 'คหกรรมศาสตร์', value: 'home_economics'}, {label: 'เทคโนโลยีธุรกิจดิจิทัล', value: 'digital_business_tech'} ]}
+                ]
+            },
+            { 
+                title: 'ตอนที่ 2: ระดับความพึงพอใจต่อการเข้าร่วมโครงการ', type: 'ratings', sections: [
+                    { title: '1. ด้านวิทยากร', questions: ['1.1 การถ่ายทอดความรู้ของวิทยากรมีความชัดเจน', '1.2 ความสามารถในการอธิบายเนื้อหา', '1.3 การเชื่อมโยงเนื้อหาในการฝึกอบรม', '1.4 มีความครบถ้วนของเนื้อหาในการฝึกอบรม', '1.5 การใช้เวลาตามที่กำหนดไว้', '1.6 การตอบข้อซักถามในการฝึกอบรม'] },
+                    { title: '2. ด้านการดำเนินงาน', questions: ['2.1 ความเหมาะสมของพิธีการอบรม', '2.2 ระยะเวลาในการอบรมมีความเหมาะสม', '2.3 การประชาสัมพันธ์โครงการ', '2.4 การติดต่อประสานงานโครงการที่ดีก่อนเข้าอบรม'] },
+                    { title: '3. ด้านความรู้ความเข้าใจ', questions: ['3.1 หลังจากได้รับการอบรมท่านมีความรู้เพิ่มมากขึ้นเพียงใด', '3.2 ประโยชน์ที่ท่านได้รับจากการอบรม'] },
+                    { title: '4. ด้านการนำความรู้ไปใช้', questions: ['4.1 สามารถนำความรู้ที่ได้รับไปประยุกต์ใช้ในการปฏิบัติงานได้', '4.2 สามารถนำความรู้ไปเผยแพร่/ถ่ายทอดได้'] }
+                ]
+            },
+            { title: 'ตอนที่ 3: ข้อเสนอแนะเพิ่มเติม', type: 'textarea', id: 'suggestions' }
+        ];
+        
+        const allQuestions = surveyDataStructure.find(s => s.type === 'ratings').sections.flatMap(sec => sec.questions);
+        const totalRequiredInputs = surveyDataStructure.find(s => s.type === 'userInfo').fields.length + allQuestions.length;
+        
+        const statusLabels = { student: 'นักเรียน/นักศึกษา', advisor: 'ครูที่ปรึกษาธุรกิจ'};
+        const educationLabels = { voc_cert: 'ปวช.', high_voc_cert: 'ปวส.', bachelor: 'ปริญญาตรี', postgraduate: 'สูงกว่าปริญญาตรี'};
+        const departmentLabels = { automotive: 'ช่างยนต์', mechanic: 'ช่างกลโรงงาน', welding: 'ช่างเชื่อมโลหะ', electrical: 'ช่างไฟฟ้ากำลัง', electronics: 'ช่างอิเล็กทรอนิกส์', accounting: 'การบัญชี', home_economics: 'คหกรรมศาสตร์', digital_business_tech: 'เทคโนโลยีธุรกิจดิจิทัล' };
+
+        // --- CORE FUNCTIONS ---
+        function showView(viewId) { for (const id in views) { views[id].classList.toggle('hidden', id !== viewId); } window.scrollTo(0, 0); }
+
+        function populateFormQuestions() {
+            formContent.innerHTML = ''; let questionIndex = 0;
+            surveyDataStructure.forEach(section => {
+                const sectionEl = document.createElement('div'); sectionEl.className = 'mb-10';
+                let contentHtml = `<h2 class="text-xl font-bold text-gray-800 border-b-2 border-blue-500 pb-3 mb-6">${section.title}</h2>`;
+                if (section.type === 'userInfo') {
+                    contentHtml += `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">`;
+                    section.fields.forEach(f => {
+                         contentHtml += `<div><label class="block text-gray-700 font-bold mb-3">${f.label}</label>`;
+                        if (f.type === 'radio') {
+                            contentHtml += `<div class="flex flex-col space-y-2">`; f.options.forEach(opt => contentHtml += `<label class="flex items-center text-lg"><input type="radio" name="${f.id}" value="${opt.value}" class="h-4 w-4 text-blue-600 border-gray-300" required><span class="ml-2">${opt.label}</span></label>`); contentHtml += `</div>`;
+                        } else if (f.type === 'select') {
+                            contentHtml += `<select name="${f.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 text-lg" required>`; f.options.forEach(opt => contentHtml += `<option value="${opt.value}" ${opt.value === '' ? 'disabled selected' : ''}>${opt.label}</option>`); contentHtml += `</select>`;
+                        }
+                        contentHtml += `</div>`;
+                    });
+                    contentHtml += `</div>`;
+                } else if (section.type === 'ratings') {
+                    section.sections.forEach(subSection => {
+                        contentHtml += `<h3 class="text-lg font-semibold text-gray-700 mt-8 mb-4">${subSection.title}</h3>`;
+                        subSection.questions.forEach(q => {
+                            contentHtml += `<div class="bg-gray-50 rounded-xl p-6 mb-6 shadow-sm"><p class="text-lg font-semibold text-gray-800 mb-5">${q}</p><div class="flex justify-around items-center gap-2 flex-wrap">`;
+                            [5, 4, 3, 2, 1].forEach(val => { contentHtml += `<div><input type="radio" name="rating${questionIndex}" value="${val}" id="rating${questionIndex}-${val}" class="rating-input" required><label for="rating${questionIndex}-${val}" class="rating-label">${val}</label></div>`; });
+                            contentHtml += `</div></div>`;
+                            questionIndex++;
+                        });
+                    });
+                } else if (section.type === 'textarea') {
+                    contentHtml += `<textarea name="${section.id}" class="block w-full rounded-md border-gray-300 shadow-sm p-3 text-lg" rows="4" placeholder="กรุณาใส่ข้อเสนอแนะเพิ่มเติม..."></textarea>`;
+                }
+                sectionEl.innerHTML = contentHtml; formContent.appendChild(sectionEl);
+            });
+        }
+        
+        function updateProgress() {
+            const uniqueFilled = new Set(Array.from(satisfactionForm.querySelectorAll('[required]')).filter(input => input.checked || (input.type !== 'radio' && input.value !== '')).map(i => i.name));
+            const progress = (uniqueFilled.size / totalRequiredInputs) * 100;
+            progressBarInner.style.width = `${progress}%`; progressText.textContent = `${Math.round(progress)}%`;
+        }
+        
+        satisfactionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitButton.disabled = true; submitButtonText.classList.add('hidden'); submitLoader.classList.remove('hidden');
+            try {
+                const formData = new FormData(satisfactionForm);
+                const surveyData = {
+                    userInfo: { gender: formData.get('gender'), status: formData.get('status'), education: formData.get('education'), department: formData.get('department') },
+                    ratings: allQuestions.reduce((acc, _, i) => ({ ...acc, [`question_${i}`]: parseInt(formData.get(`rating${i}`)) }), {}),
+                    suggestions: formData.get('suggestions') || '', submittedAt: new Date().toISOString()
+                };
+                
+                let responses = JSON.parse(localStorage.getItem(surveyId)) || [];
+                responses.push(surveyData);
+                localStorage.setItem(surveyId, JSON.stringify(responses));
+
+                surveyFormContainer.classList.add('hidden'); successMessage.classList.remove('hidden');
+            } catch (err) { formErrorMessage.textContent = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'; formErrorMessage.classList.remove('hidden'); }
+            finally { submitButton.disabled = false; submitButtonText.classList.remove('hidden'); submitLoader.classList.add('hidden'); }
+        });
+
+        resetButton.addEventListener('click', () => { satisfactionForm.reset(); populateFormQuestions(); satisfactionForm.addEventListener('change', updateProgress); successMessage.classList.add('hidden'); surveyFormContainer.classList.remove('hidden'); updateProgress(); });
+        
+        function fetchAndDisplaySummary() {
+            summaryLoadingState.classList.remove('hidden'); dashboardContent.classList.add('hidden'); summaryErrorState.classList.add('hidden'); summaryEmptyState.classList.add('hidden');
+            try {
+                const responses = JSON.parse(localStorage.getItem(surveyId)) || [];
+                if (responses.length === 0) { summaryEmptyState.classList.remove('hidden'); return; }
+                processAndRenderData(responses);
+                dashboardContent.classList.remove('hidden');
+            } catch (err) { summaryErrorMessage.textContent = err.message; summaryErrorState.classList.remove('hidden'); }
+            finally { summaryLoadingState.classList.add('hidden'); }
+        }
+        function calculateStats(arr) { const n = arr.length; if (n === 0) return { mean: 0, sd: 0 }; const mean = arr.reduce((a, b) => a + b, 0) / n; const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n; return { mean, sd: Math.sqrt(variance) }; }
+        function getSatisfactionLevel(score) { if (score >= 4.51) return 'มากที่สุด'; if (score >= 3.51) return 'มาก'; if (score >= 2.51) return 'ปานกลาง'; if (score >= 1.51) return 'น้อย'; if (score >= 1.00) return 'น้อยที่สุด'; return 'ไม่มีข้อมูล'; }
+        
+        function processAndRenderData(responses) {
+            const totalCount = responses.length;
+            const genderCounts = { male: 0, female: 0 }, statusCounts = { student: 0, advisor: 0 };
+            const educationCounts = Object.keys(educationLabels).reduce((acc, key) => ({...acc, [key]: 0 }), {});
+            const departmentCounts = Object.keys(departmentLabels).reduce((acc, key) => ({...acc, [key]: 0 }), {});
+            
+            responses.forEach(res => { 
+                if(res.userInfo.gender) genderCounts[res.userInfo.gender]++; 
+                if(res.userInfo.status) statusCounts[res.userInfo.status]++;
+                if(res.userInfo.education) educationCounts[res.userInfo.education]++;
+                if(res.userInfo.department) departmentCounts[res.userInfo.department]++;
+            });
+            renderRespondentSummary(totalCount, genderCounts, statusCounts, educationCounts, departmentCounts);
+
+            const suggestions = responses.map(r => r.suggestions).filter(s => s && s.trim());
+            suggestionsListEl.innerHTML = suggestions.length > 0 ? suggestions.map(s => `<div class="bg-gray-50 p-3 rounded-lg border-l-4 border-blue-400">“${s}”</div>`).join('') : '<p class="text-gray-500 italic">ไม่มีข้อเสนอแนะ</p>';
+            
+            summaryRatingsTableBody.innerHTML = '';
+            let questionIndex = 0;
+            let allRatings = [];
+            const sectionStats = [];
+
+            surveyDataStructure.find(s => s.type === 'ratings').sections.forEach(section => {
+                let sectionRatings = [];
+                summaryRatingsTableBody.innerHTML += `<tr class="bg-gray-200 font-bold"><td colspan="4" class="px-6 py-3 text-left text-sm text-gray-800">${section.title}</td></tr>`;
+                section.questions.forEach(q => {
+                    const ratings = responses.map(r => r.ratings[`question_${questionIndex}`]).filter(v => v);
+                    sectionRatings.push(...ratings); allRatings.push(...ratings);
+                    const stats = calculateStats(ratings);
+                    summaryRatingsTableBody.innerHTML += `<tr><td class="px-6 py-4 text-sm">${q}</td><td class="px-6 py-4 text-center font-semibold">${stats.mean.toFixed(2)}</td><td class="px-6 py-4 text-center">${stats.sd.toFixed(2)}</td><td class="px-6 py-4 text-center">${getSatisfactionLevel(stats.mean)}</td></tr>`;
+                    questionIndex++;
+                });
+                const currentSectionStats = calculateStats(sectionRatings);
+                sectionStats.push({ title: section.title, ...currentSectionStats });
+            });
+
+            const grandTotalStats = calculateStats(allRatings);
+            summaryRatingsTableBody.innerHTML += `<tr class="bg-blue-200 font-extrabold text-blue-900"><td class="px-6 py-4">รวมทั้งสิ้น</td><td class="px-6 py-4 text-center">${grandTotalStats.mean.toFixed(2)}</td><td class="px-6 py-4 text-center">${grandTotalStats.sd.toFixed(2)}</td><td class="px-6 py-4 text-center">${getSatisfactionLevel(grandTotalStats.mean)}</td></tr>`;
+            
+            currentSummaryData = { grandTotalStats, sectionStats, allQuestions, responses, suggestions };
+            renderNarrativeSummary(grandTotalStats, sectionStats);
+        }
+
+        function renderNarrativeSummary(overall, sections) {
+             const topSections = [...sections].sort((a, b) => b.mean - a.mean);
+            let summaryText = `<h3 class="text-xl font-bold text-gray-800 mb-4">สรุปผลการประเมินในภาพรวม</h3><p class="text-gray-700 leading-relaxed">ผลการประเมินโครงการอบรมฯ พบว่ามีระดับความพึงพอใจในภาพรวมอยู่ในระดับ<strong class="text-blue-600">${getSatisfactionLevel(overall.mean)}</strong> มีค่าเฉลี่ย (x̄) = <strong class="text-blue-600">${overall.mean.toFixed(2)}</strong> และส่วนเบี่ยงเบนมาตรฐาน (S.D.) = <strong class="text-blue-600">${overall.sd.toFixed(2)}</strong>. เมื่อพิจารณาเป็นรายด้าน พบว่า ${topSections.map(s => `<strong>${s.title}</strong> มีค่าเฉลี่ย (x̄) = ${s.mean.toFixed(2)} (S.D. = ${s.sd.toFixed(2)}) อยู่ในระดับ<strong class="text-blue-600">${getSatisfactionLevel(s.mean)}</strong>`).join(', ')}.</p>`;
+            narrativeSummaryContainer.innerHTML = summaryText;
+        }
+        
+        function renderRespondentSummary(total, gender, status, education, department) {
+            const findTop = (counts, labels) => { let topKey = total > 0 ? Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, '') : ''; return { name: labels[topKey] || 'N/A', count: counts[topKey] || 0 }; };
+            const topEdu = findTop(education, educationLabels);
+            const topDept = findTop(department, departmentLabels);
+            let summaryHtml = `<h3 class="text-xl font-bold text-gray-800 mb-4">สรุปข้อมูลผู้ตอบแบบสอบถาม</h3><div class="space-y-3 text-gray-700"><p>มีผู้ตอบแบบสอบถามทั้งสิ้น <strong class="text-gray-900">${total}</strong> คน โดยสามารถสรุปได้ดังนี้:</p><ul class="list-disc list-inside pl-4 space-y-2"><li><strong>เพศ:</strong> ชาย ${gender.male} คน (${(total > 0 ? (gender.male/total*100) : 0).toFixed(1)}%), หญิง ${gender.female} คน (${(total > 0 ? (gender.female/total*100) : 0).toFixed(1)}%).</li><li><strong>สถานภาพ:</strong> นักเรียน/นักศึกษา ${status.student} คน, ครูที่ปรึกษาธุรกิจ ${status.advisor} คน.</li><li><strong>ระดับการศึกษาส่วนใหญ่:</strong> ${topEdu.name}.</li><li><strong>แผนกวิชาส่วนใหญ่:</strong> ${topDept.name}.</li></ul></div>`;
+            respondentSummaryContainer.innerHTML = summaryHtml;
+        }
+
+        function exportToXlsx() {
+            if (!currentSummaryData) { alert("กรุณาโหลดข้อมูลสรุปก่อน Export"); return; }
+            const { grandTotalStats, sectionStats, allQuestions, responses, suggestions } = currentSummaryData;
+
+            const summaryTableData = [];
+            let qIndex = 0;
+            surveyDataStructure.find(s => s.type === 'ratings').sections.forEach((section, secIndex) => {
+                summaryTableData.push({ 'รายการประเมิน': section.title, 'ค่าเฉลี่ย': '', 'S.D.': '', 'ระดับความพึงพอใจ': '' });
+                section.questions.forEach(q => {
+                    const ratings = responses.map(r => r.ratings[`question_${qIndex}`]).filter(v => v);
+                    const stats = calculateStats(ratings);
+                    summaryTableData.push({ 'รายการประเมิน': q, 'ค่าเฉลี่ย': stats.mean, 'S.D.': stats.sd, 'ระดับความพึงพอใจ': getSatisfactionLevel(stats.mean) });
+                    qIndex++;
+                });
+                const currentSectionStats = sectionStats[secIndex];
+                summaryTableData.push({ 'รายการประเมิน': `สรุป ${section.title}`, 'ค่าเฉลี่ย': currentSectionStats.mean, 'S.D.': currentSectionStats.sd, 'ระดับความพึงพอใจ': getSatisfactionLevel(currentSectionStats.mean) });
+            });
+            summaryTableData.push({ 'รายการประเมิน': "รวมทั้งสิ้น", 'ค่าเฉลี่ย': grandTotalStats.mean, 'S.D.': grandTotalStats.sd, 'ระดับความพึงพอใจ': getSatisfactionLevel(grandTotalStats.mean) });
+            const wsSummary = XLSX.utils.json_to_sheet(summaryTableData);
+
+            const rawData = responses.map((res, i) => {
+                const row = { "ลำดับ": i + 1, "เพศ": res.userInfo.gender, "สถานภาพ": res.userInfo.status, "ระดับการศึกษา": res.userInfo.education, "แผนกวิชา": res.userInfo.department };
+                allQuestions.forEach((q, index) => { row[q] = res.ratings[`question_${index}`]; });
+                row["ข้อเสนอแนะ"] = res.suggestions;
+                return row;
+            });
+            const wsRawData = XLSX.utils.json_to_sheet(rawData);
+
+            const suggestionsData = suggestions.map(s => ({ "ข้อเสนอแนะ": s }));
+            const wsSuggestions = XLSX.utils.json_to_sheet(suggestionsData);
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, wsSummary, "สรุปผล");
+            XLSX.utils.book_append_sheet(wb, wsRawData, "ข้อมูลดิบ");
+            XLSX.utils.book_append_sheet(wb, wsSuggestions, "ข้อเสนอแนะ");
+            XLSX.writeFile(wb, "สรุปผลการอบรมผู้ประกอบการ.xlsx");
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFormQuestions();
+            satisfactionForm.addEventListener('change', updateProgress);
+            showView('mainMenuView');
+        });
+    </script>
+</body>
+</html>
