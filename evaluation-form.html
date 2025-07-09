@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 มาตรฐาน 9 ด้าน 33 ภารกิจ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+        /* Custom styles for better table visibility on small screens */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">3 มาตรฐาน 9 ด้าน 33 ภารกิจ</h1>
+            <p class="text-gray-600 mt-2">แบบประเมินมาตรฐานการอาชีวศึกษา</p>
+        </header>
+
+        <!-- Summary Section -->
+        <section id="summary-section" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">สรุปผลการประเมิน</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <p class="text-sm font-semibold text-blue-700">รวมปี 2566</p>
+                    <p id="total-2566" class="text-3xl font-bold text-blue-800">0</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <p class="text-sm font-semibold text-green-700">รวมปี 2565</p>
+                    <p id="total-2565" class="text-3xl font-bold text-green-800">0</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg">
+                    <p class="text-sm font-semibold text-yellow-700">รวมปี 2564</p>
+                    <p id="total-2564" class="text-3xl font-bold text-yellow-800">0</p>
+                </div>
+                <div class="bg-indigo-100 p-4 rounded-lg">
+                    <p class="text-sm font-semibold text-indigo-700">รวมทั้งหมด</p>
+                    <p id="grand-total" class="text-3xl font-bold text-indigo-800">0</p>
+                </div>
+            </div>
+        </section>
+
+        <main class="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+            <div id="standards-container" class="space-y-8">
+                <!-- Data will be dynamically inserted here by JavaScript -->
+            </div>
+        </main>
+
+        <footer class="text-center mt-8 text-sm text-gray-500">
+            <p>สร้างโดย Gemini</p>
+        </footer>
+    </div>
+
+    <script>
+        // Data parsed from the document
+        const standardsData = [
+            {
+                title: "มาตรฐานที่ 1 คุณลักษณะของผู้สำเร็จการศึกษาอาชีวศึกษาที่พึงประสงค์",
+                aspects: [
+                    {
+                        title: "ด้านที่ 1.1 ด้านความรู้",
+                        tasks: [
+                            { id: "1.1.1", description: "การพัฒนาสมรรถนะผู้สำเร็จการศึกษาในหมวดวิชาสมรรถนะแกนกลาง" },
+                            { id: "1.1.2", description: "การประเมินมาตรฐานวิชาชีพ" },
+                            { id: "1.1.3", description: "การทดสอบหรือประเมินสมรรถนะบุคคลของผู้สำเร็จการศึกษาตามมาตรฐานอื่น (ถ้ามี)" }
+                        ]
+                    },
+                    {
+                        title: "ด้านที่ 1.2 ด้านทักษะและการประยุกต์ใช้",
+                        tasks: [
+                            { id: "1.2.1", description: "การพัฒนาสมรรถนะผู้สำเร็จการศึกษาในหมวดวิชาสมรรถนะอาชีพ" },
+                            { id: "1.2.2", description: "การประกวดหรือแข่งขันทักษะวิชาชีพ" },
+                            { id: "1.2.3", description: "สมรรถนะในการเป็นผู้ประกอบการหรือประกอบอาชีพอิสระ" },
+                            { id: "1.2.4", description: "การทดสอบหรือประเมินสมรรถนะบุคคลของผู้สำเร็จการศึกษาตามมาตรฐานอาชีพ" },
+                            { id: "1.2.5", description: "การมีงานทำและศึกษาต่อผู้สำเร็จการศึกษา" },
+                            { id: "1.2.6", description: "ความพึงพอใจของหน่วยงาน สถานประกอบการ หรือผู้ใช้ต่อคุณภาพของผู้สำเร็จการศึกษา" }
+                        ]
+                    },
+                    {
+                        title: "ด้านที่ 1.3 ด้านคุณธรรม จริยธรรม และคุณลักษณะที่พึ่งประสงค์",
+                        tasks: [
+                            { id: "1.3.1", description: "การพัฒนาคุณธรรม จริยธรรม และคุณลักษณะที่พึ่งประสงค์ของผู้สำเร็จการศึกษา" },
+                            { id: "1.3.2", description: "การประเมินคุณลักษณะที่พึ่งประสงค์ของผู้สำเร็จการศึกษา" },
+                            { id: "1.3.3", description: "การดูแลช่วยเหลือและแนะแนวผู้สำเร็จการศึกษา" }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: "มาตรฐานที่ 2 การจัดการอาชีวศึกษา",
+                aspects: [
+                    {
+                        title: "ด้านที่ 2.1 ด้านหลักสูตรฐานสมรรถนะอย่างเป็นระบบ",
+                        tasks: [
+                            { id: "2.1.1", description: "การพัฒนาหลักสูตรฐานสมรรถนะอย่างเป็นระบบ" },
+                            { id: "2.1.2", description: "การพัฒนาหลักสูตรฐานสมรรถนะโดยการปรับปรุงรายวิชาเดิม หรือกำหนดรายวิชาเพิ่มเติม" }
+                        ]
+                    },
+                    {
+                        title: "ด้านที่ 2.2 ด้านการจัดการเรียนการสอนอาชีวศึกษา",
+                        tasks: [
+                            { id: "2.2.1", description: "การพัฒนาคุณภาพแผนการจัดการเรียนรู้ ที่เน้นผู้เรียนเป็นสำคัญ" },
+                            { id: "2.2.2", description: "การนำแผนการจัดการเรียนรู้ที่เน้นผู้เรียนเป็นสำคัญไปใช้ในการจัดเรียน" },
+                            { id: "2.2.3", description: "การส่งเสริมให้ผู้เรียนได้ฝึกประสบการณ์สมรรถนะวิชาชีพหรือฝึกอาชีพ" },
+                            { id: "2.2.4", description: "การจัดการเรียนการสอน ด้วยเทคนิควิธีการสอนที่หลากหลาย" },
+                            { id: "2.2.5", description: "การบริหารจัดการชั้นเรียนที่เหมาะสม" },
+                            { id: "2.2.6", description: "การพัฒนาตนเองและพัฒนาวิชาชีพ" },
+                            { id: "2.2.7", description: "การใช้เทคโนโลยีดิจิทัลเพื่อการจัดการเรียนการสอน" }
+                        ]
+                    },
+                    {
+                        title: "ด้านที่ 2.3 ด้านการบริหารจัดการ",
+                        tasks: [
+                            { id: "2.3.1", description: "การบริหารจัดการสถานศึกษาแบบมีส่วนร่วม" },
+                            { id: "2.3.2", description: "การพัฒนาระบบดูแลช่วยเหลือผู้เรียน" },
+                            { id: "2.3.3", description: "การบริหารจัดการระบบข้อมูลและสารสนเทศเพื่อการบริหารจัดการสถานศึกษา" },
+                            { id: "2.3.4", description: "การพัฒนาอาคารสถานที่ ห้องเรียน ห้องปฏิบัติการ โรงฝึกงาน หรืองานฟาร์ม" },
+                            { id: "2.3.5", description: "การพัฒนาระบบสาธารณูปโภคพื้นฐาน" },
+                            { id: "2.3.6", description: "การพัฒนาแหล่งเรียนรู้และศูนย์วิทยบริการ" },
+                            { id: "2.3.7", description: "การนำการประกันคุณภาพการศึกษาไปใช้ในการพัฒนาสถานศึกษาอย่างต่อเนื่อง" }
+                        ]
+                    },
+                    {
+                        title: "ด้านที่ 2.4 ด้านการนำนโยบายสู่การปฏิบัติ",
+                        tasks: [
+                            { id: "2.4.1", description: "การบริหารจัดการสถานศึกษาตามนโยบายที่หน่วยงานต้นสังกัดมอบหมาย" }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: "มาตรฐานที่ 3 การสร้างสังคมแห่งการเรียนรู้",
+                aspects: [
+                    {
+                        title: "ด้านที่ 3.1 ด้านความร่วมมือในการสร้างสังคมแห่งการเรียนรู้",
+                        tasks: [
+                            { id: "3.1.1", description: "การบริการชุมชนและจิตอาสา" },
+                            { id: "3.1.2", description: "การจัดการอาชีวศึกษาระบบทวิภาคี" },
+                            { id: "3.1.3", description: "การระดมทรัพยากรเพื่อการจัดการเรียนการสอน" }
+                        ]
+                    },
+                    {
+                        title: "ด้านนวัตกรรม 3.2 สิ่งประดิษฐ์ งานสร้างสรรค์ งานวิจัย",
+                        tasks: [
+                            { id: "3.2.1", description: "การส่งเสริมและสนับสนุนการพัฒนานวัตกรรมสิ่งประดิษฐ์ งานสร้างสรรค์และงานวิจัยโดยการมีส่วนร่วมของครู ผู้เรียน หรือบุคคล ชุมชน และองค์กรต่างๆ" }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Function to render the data into the HTML
+        function renderStandards() {
+            const container = document.getElementById('standards-container');
+            if (!container) return;
+
+            let htmlContent = '';
+
+            standardsData.forEach(standard => {
+                htmlContent += `
+                    <section class="border border-gray-200 rounded-lg overflow-hidden">
+                        <h2 class="bg-indigo-600 text-white p-4 text-xl font-bold">${standard.title}</h2>
+                        <div class="space-y-6 p-4 md:p-6">
+                `;
+
+                standard.aspects.forEach(aspect => {
+                    htmlContent += `
+                        <div class="aspect-group">
+                            <h3 class="font-bold text-lg text-indigo-800 bg-indigo-50 p-3 rounded-md">${aspect.title}</h3>
+                            <div class="table-container mt-4">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">ภารกิจ</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8/12">รายละเอียด</th>
+                                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">2566</th>
+                                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">2565</th>
+                                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">2564</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                    `;
+                    aspect.tasks.forEach(task => {
+                        htmlContent += `
+                                        <tr>
+                                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${task.id}</td>
+                                            <td class="px-4 py-4 text-sm text-gray-700">${task.description}</td>
+                                            <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" data-year="2566" class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" data-year="2565" class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                            </td>
+                                            <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" data-year="2564" class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                            </td>
+                                        </tr>
+                        `;
+                    });
+
+                    htmlContent += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                htmlContent += `
+                        </div>
+                    </section>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+        }
+
+        // Function to update the total counts
+        function updateTotals() {
+            const total2566 = document.querySelectorAll('input[data-year="2566"]:checked').length;
+            const total2565 = document.querySelectorAll('input[data-year="2565"]:checked').length;
+            const total2564 = document.querySelectorAll('input[data-year="2564"]:checked').length;
+            
+            const grandTotal = total2566 + total2565 + total2564;
+
+            document.getElementById('total-2566').textContent = total2566;
+            document.getElementById('total-2565').textContent = total2565;
+            document.getElementById('total-2564').textContent = total2564;
+            document.getElementById('grand-total').textContent = grandTotal;
+        }
+
+        // Add event listener when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            renderStandards(); // Render the table content
+            updateTotals();    // Calculate initial totals (which is 0)
+
+            // Listen for changes on the main container for better performance
+            const mainContainer = document.getElementById('standards-container');
+            if (mainContainer) {
+                mainContainer.addEventListener('change', (event) => {
+                    // Check if the changed element is a checkbox
+                    if (event.target.matches('input[type="checkbox"]')) {
+                        updateTotals();
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
